@@ -1,0 +1,15 @@
+BACKEND - Arquitectura: En capas - Node.js
+
+/backendGestionInventarios
+│
+├── src
+│   ├── controllers         // Manejan las peticiones HTTP y responden usando los servicios
+│   ├── services            // Contienen la lógica de negocio
+│   ├── repositories        // Acceso a datos; implementan lógica de persistencia (usualmente llamadas a BD)
+│   ├── models              // Definición de esquemas o entidades (por ejemplo, usando Sequelize o Mongoose)
+│   ├── lib                 // Librerías auxiliares, como repositorios genéricos reutilizables
+│   └── index.js            // Punto de entrada del servidor (puede inicializar Express, middlewares, rutas, etc.)
+│
+├── .env                    // Variables de entorno (puerto, URI BD, claves, etc.)
+├── package.json            // Información del proyecto y dependencias
+└── package-lock.json       // Versión exacta de las dependencias
