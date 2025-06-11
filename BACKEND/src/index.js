@@ -1,12 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 
-// const userController = require('./controllers/userController');
+const elementoController = require('./controllers/elementoController');
 
 const app = express();
-// app.use(express.json());
+app.use(express.json());
 
-// app.use('/api/users', userController);
+app.use('/api/elementos', elementoController);
 
 const PORT = process.env.PORT || 3000;
 
