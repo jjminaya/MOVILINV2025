@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_inventories"
+        android:icon="@drawable/baseline_folder_24" android:title="Inventarios" />
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/baseline_account_box_24" android:title="Perfil" />
+</menu>
