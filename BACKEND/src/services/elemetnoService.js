@@ -9,6 +9,10 @@ class ElementoService{
         return elementoRepository.findById(id);
     }
 
+    getElementosByIventarioID(InventarioId){
+        return elementoRepository.getElementosByIventarioID(InventarioId);
+    }
+
     createElemento(data){
         return elementoRepository.create(data);
     }
