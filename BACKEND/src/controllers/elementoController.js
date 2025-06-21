@@ -24,6 +24,19 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.get('/inventario/:InentarioID', async (req, res) => {
+    try {
+        const elementos = await elementoService.getElementosByIventarioID(req.params.InentarioID);
+        if (elementos) {
+            res.status(200).json(elementos);
+        } else {
+            res.status(404).json({ message: 'Elementos no encontrados por InventarioID' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Hubo un error al obtener los elementos por InventarioID', error: error.message });
+    }
+});
+
 router.post('/', async (req, res) => {
     try {
         const newElemento = await elementoService.createElemento(req.body);
