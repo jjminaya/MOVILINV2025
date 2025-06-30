@@ -6,19 +6,19 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.Transformations; //
+import androidx.lifecycle.Transformations;
 
-import com.example.inventario2025.data.local.entities.Inventario; //
-import com.example.inventario2025.data.repository.InventarioRepository; //
-import com.example.inventario2025.data.local.InventarioBaseDatos; //
-import com.example.inventario2025.data.local.dao.InventarioDao; //
-import com.example.inventario2025.data.remote.RetrofitClient; //
-import com.example.inventario2025.data.remote.api.InventorioApiService; //
+import com.example.inventario2025.data.local.entities.Inventario;
+import com.example.inventario2025.data.repository.InventarioRepository;
+import com.example.inventario2025.data.local.InventarioBaseDatos;
+import com.example.inventario2025.data.local.dao.InventarioDao;
+import com.example.inventario2025.data.remote.RetrofitClient;
+import com.example.inventario2025.data.remote.api.InventorioApiService;
 
-import java.util.ArrayList; //
-import java.util.List; //
-import java.util.stream.Collectors; //
-import android.util.Log; // <-- ¡Añade esta importación para los logs!
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import android.util.Log;
 
 public class InventorioListViewModel extends AndroidViewModel {
 
@@ -127,15 +127,34 @@ public class InventorioListViewModel extends AndroidViewModel {
         currentFilterType.setValue(type);
     }
 
-    public void createNewInventario(String description) {
-        _isLoading.postValue(true);
-        inventoryRepository.createInventario(description, new InventarioRepository.OnOperationCompleteListener() { //
+    private void loadInventoriesForCurrentUser(int userId) {
+        _isLoading.setValue(true);
+        inventoryRepository.getInventoriesByUserId(userId, new InventarioRepository.OnOperationCompleteListener() {
             @Override
             public void onSuccess() {
                 _isLoading.postValue(false);
                 _errorMessage.postValue(null);
-                // Tras la creación, refrescar los datos del usuario 1 para que aparezcan
-                inventoryRepository.getInventoriesByUserId(1);
+                Log.d(TAG, "Inventarios cargados exitosamente para el usuario " + userId);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                _isLoading.postValue(false);
+                _errorMessage.postValue(message);
+                Log.e(TAG, "Error al cargar inventarios para el usuario " + userId + ": " + message);
+            }
+        });
+        Log.d(TAG, "Solicitando inventarios para el usuario ID: " + userId);
+    }
+
+    public void createNewInventario(String description, int userId) {
+        _isLoading.postValue(true);
+        inventoryRepository.createInventarioOWNR(description, userId, new InventarioRepository.OnOperationCompleteListener() {
+            @Override
+            public void onSuccess() {
+                _isLoading.postValue(false);
+                _errorMessage.postValue(null);
+                loadInventoriesForCurrentUser(userId);
                 Log.d(TAG, "Inventario creado exitosamente. Refrescando lista.");
             }
 
