@@ -35,4 +35,10 @@ public interface InventarioDao {
 
     @Query("DELETE FROM inventario WHERE idInventario = :inventarioId")
     void deleteById(int inventarioId);
+
+    @Query("SELECT * FROM inventario WHERE ownerUserId = :userId ORDER BY idInventario DESC")
+    LiveData<List<Inventario>> getInventariosByUserId(int userId);
+
+    @Query("DELETE FROM inventario")
+    void deleteAll();
 }

@@ -17,6 +17,10 @@ class InventarioService{
         return inventarioRepository.create(data);
     }
 
+    crearInventarioOWNR(data){
+        return inventarioRepository.crearInventarioOWNR(data);
+    }
+
     updateInventario(id, data){
         return inventarioRepository.update(id, data);
     }

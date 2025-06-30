@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.inventario2025.databinding.InventorioListBinding;
 import com.example.inventario2025.ui.adapters.InventarioAdapter;
+import com.example.inventario2025.ui.dialogos.CrearInventarioDialogFragment;
 
 import java.util.ArrayList;
 
@@ -92,9 +93,8 @@ public class InventorioListFragment extends Fragment {
 
     private void setupClickListeners() {
         binding.btnCreateInventory.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Funcionalidad de crear aún no implementada", Toast.LENGTH_SHORT).show();
-            // Ejemplo de cómo llamar a la creación:
-            // inventarioListViewModel.createNewInventario("Nuevo Inventario de Prueba");
+            CrearInventarioDialogFragment dialog = CrearInventarioDialogFragment.newInstance();
+            dialog.show(getChildFragmentManager(), "CreateInventoryDialog");
         });
 
         // Listener para los botones de filtro

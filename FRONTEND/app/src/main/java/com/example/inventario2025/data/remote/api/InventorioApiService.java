@@ -2,6 +2,7 @@ package com.example.inventario2025.data.remote.api;
 
 import com.example.inventario2025.data.remote.models.InventarioRequest;
 import com.example.inventario2025.data.remote.models.InventarioResponse;
+import com.example.inventario2025.data.remote.models.InventarioCreateRequest;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -28,6 +29,10 @@ public interface InventorioApiService {
     // Crea un nuevo inventario (requiere un body con "descripcionInventario")
     @POST("inventarios") // Endpoint: http://200.234.238.128/api/inventarios
     Call<InventarioResponse> createInventario(@Body InventarioRequest inventarioRequest);
+
+    // Crea un nuevo inventario con descripción y userID
+    @POST("inventarios/newOWNRInv")// Mismo endpoint POST para crear, pero con un body diferente
+    Call<InventarioResponse> createInventarioOWNR(@Body InventarioCreateRequest request);
 
     // Modifica la data de un inventario existente (requiere un body con "descripcionInventario")
     @PUT("inventarios/{id}") // Endpoint: http://200.234.238.128/api/inventarios/:id
