@@ -29,14 +29,18 @@ public class Inventario {
     @SerializedName("rangoColaborador")
     private String rangoColaborador;
 
+    @ColumnInfo(name = "ownerUserId")
+    private int ownerUserId;
+
     public Inventario() {}
 
-    public Inventario(int idInventario, String descripcionInventario, int elementosInventario, int estado, String rangoColaborador) {
+    public Inventario(int idInventario, String descripcionInventario, int elementosInventario, int estado, String rangoColaborador, int ownerUserId) {
         this.idInventario = idInventario;
         this.descripcionInventario = descripcionInventario;
         this.elementosInventario = elementosInventario;
         this.estado = estado;
         this.rangoColaborador = rangoColaborador;
+        this.ownerUserId = ownerUserId;
     }
 
     public Inventario(String descripcionInventario, int elementosInventario, int estado, String rangoColaborador) {
@@ -85,4 +89,8 @@ public class Inventario {
     public void setRangoColaborador(String rangoColaborador) {
         this.rangoColaborador = rangoColaborador;
     }
+
+    public int getOwnerUserId() { return ownerUserId; }
+
+    public void setOwnerUserId(int ownerUserId) { this.ownerUserId = ownerUserId; }
 }
