@@ -30,7 +30,7 @@ public class InventarioResponse {
     // Getters
     public int getIdInventario() { return idInventario; }
     public String getDescripcionInventario() { return descripcionInventario; }
-    public int getElementosInventario() { return elementosInventario; } // Corrección del typo 'elementosInventos'
+    public int getElementosInventario() { return elementosInventario; }
     public int getEstado() { return estado; }
     public String getRangoColaborador() { return rangoColaborador; }
 
@@ -42,13 +42,14 @@ public class InventarioResponse {
     public void voidRangoColaborador(String rangoColaborador) { this.rangoColaborador = rangoColaborador; } // Corrección del typo 'voidRangoColaborador' a 'setRangoColaborador'
 
     // Metodo para convertir a entidad local 'Inventario'
-    public Inventario toInventario() {
+    public Inventario toInventario(int ownerUserId) {
         return new Inventario(
                 this.idInventario,
                 this.descripcionInventario,
                 this.elementosInventario,
                 this.estado,
-                this.rangoColaborador
+                this.rangoColaborador,
+                ownerUserId
         );
     }
 }

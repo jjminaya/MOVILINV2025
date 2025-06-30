@@ -11,7 +11,7 @@ import com.example.inventario2025.data.local.entities.Inventario;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {Inventario.class}, version = 3, exportSchema = false)
+@Database(entities = {Inventario.class}, version = 5, exportSchema = false)
 public abstract class InventarioBaseDatos extends RoomDatabase {
 
     public abstract InventarioDao inventoryDao();
@@ -27,6 +27,7 @@ public abstract class InventarioBaseDatos extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     InventarioBaseDatos.class, "inventory_database")
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }
