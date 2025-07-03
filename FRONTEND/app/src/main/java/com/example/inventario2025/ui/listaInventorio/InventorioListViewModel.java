@@ -27,8 +27,8 @@ public class InventorioListViewModel extends AndroidViewModel {
 
     private final LiveData<List<Inventario>> allCachedInventories;
     private final MutableLiveData<FilterType> currentFilterType = new MutableLiveData<>(FilterType.OWNED); // Inicia con "Creados por mí"
-
-    private final LiveData<List<Inventario>> filteredInventories;
+    private final MutableLiveData<String> searchQuery = new MutableLiveData<>(""); // LiveData para la cadena de búsqueda
+    private final MediatorLiveData<List<Inventario>> filteredInventories = new MediatorLiveData<>();
 
     private final MutableLiveData<Boolean> _isLoading = new MutableLiveData<>(false);
     public LiveData<Boolean> isLoading = _isLoading;
@@ -51,71 +51,77 @@ public class InventorioListViewModel extends AndroidViewModel {
 
         inventoryRepository = new InventarioRepository(inventoryDao, apiService);
 
-        // Dispara la carga de inventarios del usuario 1 desde la API (esto pq no hay mas usuarios).
-        // Esto insertará/actualizará los inventarios en la base de datos local.
-        _isLoading.setValue(true);
-        inventoryRepository.getInventoriesByUserId(1);
-        Log.d(TAG, "Solicitando inventarios para el usuario ID: 1");
+        loadInventoriesForCurrentUser(1);
 
-        // allCachedInventories observa la base de datos local.
-        // Recibe actualizaciones cada vez que Room se actualiza (por getInventories() o getInventoriesByUserId()).
-        allCachedInventories = inventoryRepository.getInventories();
+        allCachedInventories = inventoryRepository.getInventoriesByUserId(1);
 
-        // filteredInventories se actualiza cuando cambia allCachedInventories o currentFilterType
-        filteredInventories = Transformations.switchMap(currentFilterType, filterType -> {
-            Log.d(TAG, "Transformations.switchMap - FilterType cambiado a: " + filterType);
-            MediatorLiveData<List<Inventario>> result = new MediatorLiveData<>();
-            result.addSource(allCachedInventories, inventories -> {
-                Log.d(TAG, "MediatorLiveData - Recibida lista de inventarios (todos). Cantidad: " + (inventories != null ? inventories.size() : "null") + ", Tipo de filtro actual: " + filterType);
-                if (inventories == null) {
-                    result.setValue(null);
-                    return;
-                }
-                List<Inventario> filteredList = new ArrayList<>();
-                switch (filterType) {
-                    case OWNED:
-                        filteredList = inventories.stream()
-                                .filter(inv -> {
-                                    boolean isOwner = "OWNR".equals(inv.getRangoColaborador());
-                                    Log.d(TAG, "Filtro OWNED - ID: " + inv.getIdInventario() + ", Descripción: " + inv.getDescripcionInventario() + ", Rango: '" + inv.getRangoColaborador() + "', ¿Es OWNED?: " + isOwner);
-                                    return isOwner;
-                                })
-                                .collect(Collectors.toList());
-                        break;
-                    case SHARED:
-                        filteredList = inventories.stream()
-                                .filter(inv -> {
-                                    boolean isShared = !"OWNR".equals(inv.getRangoColaborador());
-                                    Log.d(TAG, "Filtro SHARED - ID: " + inv.getIdInventario() + ", Descripción: " + inv.getDescripcionInventario() + ", Rango: '" + inv.getRangoColaborador() + "', ¿Es SHARED?: " + isShared);
-                                    return isShared;
-                                })
-                                .collect(Collectors.toList());
-                        break;
-                    case ALL:
-                    default:
-                        filteredList = new ArrayList<>(inventories);
-                        Log.d(TAG, "Filtro ALL aplicado.");
-                        break;
-                }
-                Log.d(TAG, "Lista filtrada para " + filterType + ". Cantidad: " + filteredList.size());
-                result.setValue(filteredList);
-            });
-            return result;
+        filteredInventories.addSource(allCachedInventories, inventories -> {
+            Log.d(TAG, "MediatorLiveData - Source allCachedInventories changed.");
+            filterInventories();
         });
+        filteredInventories.addSource(currentFilterType, filterType -> {
+            Log.d(TAG, "MediatorLiveData - Source currentFilterType changed to: " + filterType);
+            filterInventories();
+        });
+        filteredInventories.addSource(searchQuery, query -> {
+            Log.d(TAG, "MediatorLiveData - Source searchQuery changed to: '" + query + "'");
+            filterInventories();
+        });
+    }
 
-        // Este observador es para manejar el mensaje de "No data" basado en la lista filtrada
-        filteredInventories.observeForever(inventories -> {
-            Log.d(TAG, "Observador de filteredInventories - Cantidad: " + (inventories != null ? inventories.size() : "null"));
-            if (inventories == null || inventories.isEmpty()) {
-                _errorMessage.postValue("No se encontraron inventarios para este tipo de filtro.");
-                Log.d(TAG, "Mensaje de error: 'No se encontraron inventarios para este tipo de filtro.'");
+    private void filterInventories() {
+        Log.d(TAG, "filterInventories - Recibida lista de inventarios (todos). Cantidad: " + (allCachedInventories.getValue() != null ? allCachedInventories.getValue().size() : 0) + ", Tipo de filtro actual: " + currentFilterType.getValue() + ", Query de búsqueda: '" + searchQuery.getValue() + "'");
+
+        List<Inventario> allInventories = allCachedInventories.getValue();
+        FilterType currentType = currentFilterType.getValue();
+        String currentSearchQuery = searchQuery.getValue();
+
+        if (allInventories == null) {
+            allInventories = new ArrayList<>();
+            Log.d(TAG, "filterInventories - allInventories was null, initialized as empty list.");
+        }
+
+        List<Inventario> tempFilteredList = new ArrayList<>();
+
+        // Paso 1: Filtrar por tipo (OWNED o SHARED)
+        if (currentType == FilterType.OWNED) {
+            tempFilteredList = allInventories.stream()
+                    .filter(inventario -> "OWNR".equalsIgnoreCase(inventario.getRangoColaborador()))
+                    .collect(Collectors.toList());
+        } else if (currentType == FilterType.SHARED) {
+            tempFilteredList = allInventories.stream()
+                    .filter(inventario -> "COLAB".equalsIgnoreCase(inventario.getRangoColaborador()))
+                    .collect(Collectors.toList());
+        } else {
+            tempFilteredList.addAll(allInventories);
+        }
+
+        // Paso 2: Aplicar filtro de búsqueda a la lista ya filtrada por tipo
+        if (currentSearchQuery != null && !currentSearchQuery.trim().isEmpty()) {
+            String lowerCaseQuery = currentSearchQuery.trim().toLowerCase();
+            tempFilteredList = tempFilteredList.stream()
+                    .filter(inventario -> inventario.getDescripcionInventario().toLowerCase().contains(lowerCaseQuery))
+                    .collect(Collectors.toList());
+        }
+
+        _isLoading.postValue(false);
+
+        if (tempFilteredList.isEmpty()) {
+            if (currentSearchQuery != null && !currentSearchQuery.trim().isEmpty()) {
+                _errorMessage.postValue("Oops... No se encontró inventario con este nombre en la lista '" + currentType.name() + "'.");
+                Log.d(TAG, "filterInventories - Error message: No search results.");
             } else {
-                _errorMessage.postValue(null);
-                Log.d(TAG, "Mensaje de error limpiado.");
+                _errorMessage.postValue("No se encontraron inventarios para este tipo de filtro.");
+                Log.d(TAG, "filterInventories - Error message: No inventories for filter type.");
             }
-            _isLoading.postValue(false);
-            Log.d(TAG, "isLoading puesto a false.");
-        });
+        } else {
+            _errorMessage.postValue(null);
+            Log.d(TAG, "filterInventories - Error message cleared, results found.");
+        }
+
+        // Actualizar el LiveData observable por la UI
+        filteredInventories.setValue(tempFilteredList);
+        Log.d(TAG, "filteredInventories LiveData updated. Final Count: " + tempFilteredList.size());
     }
 
     public LiveData<List<Inventario>> getInventariosDisplay() {
@@ -125,6 +131,13 @@ public class InventorioListViewModel extends AndroidViewModel {
     public void setFilterType(FilterType type) {
         Log.d(TAG, "setFilterType llamado con: " + type);
         currentFilterType.setValue(type);
+    }
+
+    public void setSearchQuery(String query) {
+        if (!query.equals(searchQuery.getValue())) {
+            searchQuery.setValue(query);
+            Log.d(TAG, "Search query cambiado a: '" + query + "'");
+        }
     }
 
     private void loadInventoriesForCurrentUser(int userId) {
