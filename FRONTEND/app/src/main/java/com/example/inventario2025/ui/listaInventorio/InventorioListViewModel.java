@@ -39,7 +39,7 @@ public class InventorioListViewModel extends AndroidViewModel {
     private final MutableLiveData<SortCriteria> currentSortCriteria = new MutableLiveData<>(SortCriteria.NONE);
     private final MediatorLiveData<List<Inventario>> inventoriesDisplay = new MediatorLiveData<>();
 
-    public enum FilterType { //
+    public enum FilterType {
         OWNED,
         SHARED,
         ALL
@@ -248,6 +248,26 @@ public class InventorioListViewModel extends AndroidViewModel {
                 _isLoading.postValue(false);
                 _errorMessage.postValue(message);
                 Log.e(TAG, "Error al crear inventario: " + message);
+            }
+        });
+    }
+
+    public void updateInventario(int inventarioId, String newDescription) {
+        _isLoading.postValue(true);
+        inventoryRepository.updateInventario(inventarioId, newDescription, new InventarioRepository.OnOperationCompleteListener() {
+            @Override
+            public void onSuccess() {
+                _isLoading.postValue(false);
+                _errorMessage.postValue(null);
+                loadInventoriesForCurrentUser(1); // Después de una actualización exitosa, recargar la lista para reflejar los cambios
+                Log.d(TAG, "Inventario " + inventarioId + " actualizado exitosamente. Refrescando lista.");
+            }
+
+            @Override
+            public void onFailure(String message) {
+                _isLoading.postValue(false);
+                _errorMessage.postValue(message);
+                Log.e(TAG, "Error al actualizar inventario " + inventarioId + ": " + message);
             }
         });
     }

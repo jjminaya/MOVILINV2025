@@ -12,7 +12,9 @@ import com.example.inventario2025.data.remote.models.InventarioRequest;
 import com.example.inventario2025.data.remote.models.InventarioCreateRequest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -200,10 +202,28 @@ public class InventarioRepository {
         });
     }
 
-    public void updateInventario(int id, String description, OnOperationCompleteListener listener) {
-        //por implementar
-    }
+    public void updateInventario(int inventarioId, String newDescription, OnOperationCompleteListener listener) {
+        Map<String, String> body = new HashMap<>();
+        body.put("descripcionInventario", newDescription);
 
+        inventoryApiService.updateInventario(inventarioId, body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    listener.onSuccess();
+                } else {
+                    Log.e("InventarioRepository", "Error al actualizar inventario. Código: " + response.code() + ", Mensaje: " + response.message() + ", Body de error: " + (response.errorBody() != null ? response.errorBody().toString() : "N/A"));
+                    listener.onFailure("Error al actualizar inventario: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("InventarioRepository", "Fallo de red al actualizar inventario: " + t.getMessage(), t);
+                listener.onFailure("Fallo de red al actualizar inventario: " + t.getMessage());
+            }
+        });
+    }
     public void deleteInventario(int id, OnOperationCompleteListener listener) {
         //por implementar
     }

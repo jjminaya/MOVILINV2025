@@ -13,6 +13,8 @@ import android.widget.Toast;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.TextView;
+
+import com.example.inventario2025.ui.dialogos.EditarInventarioDialogFragment;
 import com.google.android.material.card.MaterialCardView;
 import androidx.appcompat.widget.PopupMenu;
 import android.view.MenuItem;
@@ -63,6 +65,26 @@ public class InventorioListFragment extends Fragment {
         inventarioAdapter = new InventarioAdapter();
         binding.recyclerViewInventories.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewInventories.setAdapter(inventarioAdapter);
+
+        inventarioAdapter.setOnItemActionListener(new InventarioAdapter.OnItemActionListener() {
+            @Override
+            public void onEditClick(Inventario inventario) {
+                EditarInventarioDialogFragment dialog = EditarInventarioDialogFragment.newInstance(inventario);
+                dialog.show(getChildFragmentManager(), "EditInventoryDialog");
+            }
+
+            @Override
+            public void onAddCollaboratorClick(Inventario inventario) {
+                Toast.makeText(getContext(), "Agregar Colaborador a: " + inventario.getDescripcionInventario(), Toast.LENGTH_SHORT).show();
+                // Aqui ira la logica para agregar colaborador
+            }
+
+            @Override
+            public void onDeleteClick(Inventario inventario) {
+                Toast.makeText(getContext(), "Eliminar: " + inventario.getDescripcionInventario(), Toast.LENGTH_SHORT).show();
+                // Aqui ira la logica para eliminar el inventario
+            }
+        });
     }
 
     private void setupObservers() {

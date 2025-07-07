@@ -11,6 +11,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import java.util.List;
+import java.util.Map;
 
 public interface InventorioApiService {
 
@@ -36,7 +37,7 @@ public interface InventorioApiService {
 
     // Modifica la data de un inventario existente (requiere un body con "descripcionInventario")
     @PUT("inventarios/{id}") // Endpoint: http://200.234.238.128/api/inventarios/:id
-    Call<InventarioResponse> updateInventario(@Path("id") int idInventario, @Body InventarioRequest inventarioRequest);
+    Call<Void> updateInventario(@Path("id") int inventarioId, @Body Map<String, String> body); // Ajusta el tipo de retorno si tu API devuelve algo
 
     // Elimina un inventario por su ID (retorna Call<Void> si no hay cuerpo de respuesta)
     @DELETE("inventarios/{id}") // Endpoint: http://200.234.238.128/api/inventarios/:id
