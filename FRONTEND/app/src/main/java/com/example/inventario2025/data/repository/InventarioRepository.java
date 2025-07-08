@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import android.util.Log;
 
 import com.example.inventario2025.data.local.dao.InventarioDao;
+import com.example.inventario2025.data.local.entities.Colaborador;
 import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.data.remote.api.InventorioApiService;
 import com.example.inventario2025.data.remote.models.InventarioResponse;
@@ -224,8 +225,45 @@ public class InventarioRepository {
             }
         });
     }
+
     public void deleteInventario(int id, OnOperationCompleteListener listener) {
         //por implementar
+    }
+
+    // obtener colaboradores por ID de inventario
+    public void getColaboradoresByInventarioId(int inventarioId, OnColaboradoresLoadedListener listener) {
+        inventoryApiService.getColaboradoresByInventarioId(inventarioId).enqueue(new Callback<List<Colaborador>>() {
+            @Override
+            public void onResponse(Call<List<Colaborador>> call, Response<List<Colaborador>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onColaboradoresLoaded(response.body());
+                    Log.d(TAG, "Colaboradores cargados exitosamente para inventario " + inventarioId + ": " + response.body().size());
+                } else {
+                    String errorMessage = "Error al cargar colaboradores: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body", e);
+                        }
+                    }
+                    listener.onColaboradoresLoadFailed(errorMessage);
+                    Log.e(TAG, errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Colaborador>> call, Throwable t) {
+                listener.onColaboradoresLoadFailed("Fallo de red al cargar colaboradores: " + t.getMessage());
+                Log.e(TAG, "Fallo de red al cargar colaboradores", t);
+            }
+        });
+    }
+
+    // Nueva interfaz para el listener de colaboradores
+    public interface OnColaboradoresLoadedListener {
+        void onColaboradoresLoaded(List<Colaborador> colaboradores);
+        void onColaboradoresLoadFailed(String message);
     }
 
     public interface OnOperationCompleteListener {

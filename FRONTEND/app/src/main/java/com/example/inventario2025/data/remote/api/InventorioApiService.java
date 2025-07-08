@@ -1,5 +1,6 @@
 package com.example.inventario2025.data.remote.api;
 
+import com.example.inventario2025.data.local.entities.Colaborador;
 import com.example.inventario2025.data.remote.models.InventarioRequest;
 import com.example.inventario2025.data.remote.models.InventarioResponse;
 import com.example.inventario2025.data.remote.models.InventarioCreateRequest;
@@ -42,4 +43,8 @@ public interface InventorioApiService {
     // Elimina un inventario por su ID (retorna Call<Void> si no hay cuerpo de respuesta)
     @DELETE("inventarios/{id}") // Endpoint: http://200.234.238.128/api/inventarios/:id
     Call<Void> deleteInventario(@Path("id") int idInventario);
+
+    // Endpoint para obtener colaboradores de un inventario http://200.234.238.128/api/inventarios/inventario/:inventarioID
+    @GET("inventarios/inventario/{inventarioID}")
+    Call<List<Colaborador>> getColaboradoresByInventarioId(@Path("inventarioID") int inventarioId);
 }

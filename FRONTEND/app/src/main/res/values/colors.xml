@@ -14,4 +14,23 @@
     <color name="red">#FF0000</color>
     <color name="green">#00FF00</color>
     <color name="blue">#0000FF</color>
+
+    <color name="colorEditButton">#2196F3</color>
+    <color name="colorAddCollaboratorButton">#4CAF50</color>
+
+    <color name="owner_chip_background">#E8F5E9</color>
+    <color name="owner_chip_text">#2E7D32</color>
+    <color name="colab_chip_background">#E0F2F7</color>
+    <color name="colab_chip_text">#0277BD</color>
+    <color name="default_chip_background">#F5F5F5</color>
+    <color name="default_chip_text">#616161</color>
+
+    <color name="md_theme_primary">#6750A4</color>
+    <color name="md_theme_tertiary">#7D5260</color>
+    <color name="md_theme_error">#BA1A1A</color>
+    <color name="md_theme_primaryContainer">#EADDFF</color>
+    <color name="md_theme_onPrimaryContainer">#21005D</color>
+    <color name="md_theme_tertiaryContainer">#FFD8E4</color>
+    <color name="md_theme_onTertiaryContainer">#21005D</color>
+
 </resources>

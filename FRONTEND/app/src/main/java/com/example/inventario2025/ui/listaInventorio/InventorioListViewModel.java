@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.MediatorLiveData;
 
+import com.example.inventario2025.data.local.entities.Colaborador;
 import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.data.repository.InventarioRepository;
 import com.example.inventario2025.data.local.InventarioBaseDatos;
@@ -38,6 +39,12 @@ public class InventorioListViewModel extends AndroidViewModel {
     public LiveData<Boolean> noDataFound = _noDataFound;
     private final MutableLiveData<SortCriteria> currentSortCriteria = new MutableLiveData<>(SortCriteria.NONE);
     private final MediatorLiveData<List<Inventario>> inventoriesDisplay = new MediatorLiveData<>();
+    private final MutableLiveData<List<Colaborador>> _colaboradores = new MutableLiveData<>();
+    public LiveData<List<Colaborador>> colaboradores = _colaboradores;
+    private final MutableLiveData<Boolean> _isColaboradoresLoading = new MutableLiveData<>(false);
+    public LiveData<Boolean> isColaboradoresLoading = _isColaboradoresLoading;
+    private final MutableLiveData<String> _colaboradoresErrorMessage = new MutableLiveData<>();
+    public LiveData<String> colaboradoresErrorMessage = _colaboradoresErrorMessage;
 
     public enum FilterType {
         OWNED,
@@ -268,6 +275,29 @@ public class InventorioListViewModel extends AndroidViewModel {
                 _isLoading.postValue(false);
                 _errorMessage.postValue(message);
                 Log.e(TAG, "Error al actualizar inventario " + inventarioId + ": " + message);
+            }
+        });
+    }
+
+    // Metodo para cargar colaboradores en el ViewModel
+    public void loadColaboradores(int inventarioId) {
+        _isColaboradoresLoading.postValue(true);
+        _colaboradoresErrorMessage.postValue(null); // Limpiar errores previos
+
+        inventoryRepository.getColaboradoresByInventarioId(inventarioId, new InventarioRepository.OnColaboradoresLoadedListener() {
+            @Override
+            public void onColaboradoresLoaded(List<Colaborador> colaboradoresList) {
+                _isColaboradoresLoading.postValue(false);
+                _colaboradores.postValue(colaboradoresList);
+                Log.d(TAG, "Colaboradores cargados para inventario " + inventarioId + ". Cantidad: " + colaboradoresList.size());
+            }
+
+            @Override
+            public void onColaboradoresLoadFailed(String message) {
+                _isColaboradoresLoading.postValue(false);
+                _colaboradoresErrorMessage.postValue(message);
+                _colaboradores.postValue(new ArrayList<>()); // Limpiar lista en caso de error
+                Log.e(TAG, "Fallo al cargar colaboradores para inventario " + inventarioId + ": " + message);
             }
         });
     }

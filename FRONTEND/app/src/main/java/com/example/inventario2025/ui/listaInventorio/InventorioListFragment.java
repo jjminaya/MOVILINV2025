@@ -14,6 +14,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.TextView;
 
+import com.example.inventario2025.ui.dialogos.ColaboradoresDialogFragment;
 import com.example.inventario2025.ui.dialogos.EditarInventarioDialogFragment;
 import com.google.android.material.card.MaterialCardView;
 import androidx.appcompat.widget.PopupMenu;
@@ -75,8 +76,8 @@ public class InventorioListFragment extends Fragment {
 
             @Override
             public void onAddCollaboratorClick(Inventario inventario) {
-                Toast.makeText(getContext(), "Agregar Colaborador a: " + inventario.getDescripcionInventario(), Toast.LENGTH_SHORT).show();
-                // Aqui ira la logica para agregar colaborador
+                ColaboradoresDialogFragment dialog = ColaboradoresDialogFragment.newInstance(inventario);
+                dialog.show(getChildFragmentManager(), "ColaboradoresDialog");
             }
 
             @Override

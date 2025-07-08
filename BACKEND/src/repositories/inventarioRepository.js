@@ -28,8 +28,6 @@ class inventarioRepository extends CrudRepository {
 
       const inventarioData = {
         descripcionInventario: data.descripcion,
-        //elementosInventario: 0,
-        //estado: 1,
       };
 
       const [inventarioResult] = await connection.query(
@@ -48,7 +46,6 @@ class inventarioRepository extends CrudRepository {
         idInventario: idInventario,
         idUsuario: data.userID,
         rangoColaborador: "OWNR",
-        //estado: 1
       };
 
       await connection.query(
@@ -77,6 +74,18 @@ class inventarioRepository extends CrudRepository {
         connection.release();
       }
     }
+  }
+
+  async getColaboradoresByIdInventario(InventarioId) {
+    const query = `
+        SELECT c.idColaboradores, u.username, p.nombresPersona, p.apellidosPersona, c.rangoColaborador FROM colaborador c
+        INNER JOIN usuario u ON c.idUsuario = u.idUsuario
+        INNER JOIN persona p ON u.idPersona = p.idPersona
+        WHERE c.idInventario = ? AND c.estado = 1
+        ORDER BY c.rangoColaborador DESC;
+    `;
+    const [result] = await this.pool.query(query, [InventarioId]);
+    return result;
   }
 }
 module.exports = new inventarioRepository();
