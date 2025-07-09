@@ -15,16 +15,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.inventario2025.R;
 import com.example.inventario2025.ui.listaInventorio.InventorioListViewModel;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
+import com.example.inventario2025.databinding.CrearInventarioBinding;
+import android.widget.Toast;
 
 public class CrearInventarioDialogFragment extends DialogFragment {
 
     private InventorioListViewModel viewModel;
-    private TextInputLayout textInputLayoutDescription;
-    private TextInputEditText editTextDescription;
-    private Button buttonCreate;
-    private Button buttonCancel;
+    private CrearInventarioBinding binding;
 
     public CrearInventarioDialogFragment() {
     }
@@ -41,28 +38,33 @@ public class CrearInventarioDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.crear_inventario, container, false);
-        textInputLayoutDescription = view.findViewById(R.id.textInputLayoutDescription);
-        editTextDescription = view.findViewById(R.id.editTextDescription);
-        buttonCreate = view.findViewById(R.id.buttonCreate);
-        buttonCancel = view.findViewById(R.id.buttonCancel);
-        return view;
+        binding = CrearInventarioBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(requireParentFragment()).get(InventorioListViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(InventorioListViewModel.class);
 
-        buttonCancel.setOnClickListener(v -> dismiss());
+        binding.textViewDialogTitle.setText("Crear Nuevo Inventario");
+        binding.buttonAction.setText("Crear");
 
-        buttonCreate.setOnClickListener(v -> {
-            String description = editTextDescription.getText().toString().trim();
+        binding.buttonCancel.setOnClickListener(v -> dismiss());
+
+        binding.buttonAction.setOnClickListener(v -> {
+            String description = binding.editTextDescription.getText().toString().trim();
             if (!description.isEmpty()) {
                 viewModel.createNewInventario(description, 1);
                 dismiss();
             } else {
-                textInputLayoutDescription.setError("La descripción no puede estar vacía");
+                binding.textInputLayoutDescription.setError("La descripción no puede estar vacía");
+            }
+        });
+        // Observar mensajes de error del ViewModel
+        viewModel.errorMessage.observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                Toast.makeText(getContext(), "Error al crear inventario: " + message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -78,5 +80,11 @@ public class CrearInventarioDialogFragment extends DialogFragment {
 
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }
