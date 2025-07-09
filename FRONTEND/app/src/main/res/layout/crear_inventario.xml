@@ -5,13 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="?attr/colorSurface">
 
     <TextView
-        android:id="@+id/textViewCreateTitle"
+        android:id="@+id/textViewDialogTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Crear Nuevo Inventario"
+        android:text="Título del Diálogo"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Descripción del Inventario"
-        app:layout_constraintTop_toBottomOf="@id/textViewCreateTitle"
+        app:layout_constraintTop_toBottomOf="@id/textViewDialogTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -55,11 +56,11 @@
             android:text="Cancelar" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonCreate"
+            android:id="@+id/buttonAction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Crear" />
+            android:text="Acción" />
 
     </LinearLayout>
 
