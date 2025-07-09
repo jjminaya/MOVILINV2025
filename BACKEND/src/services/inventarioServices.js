@@ -13,6 +13,10 @@ class InventarioService{
         return inventarioRepository.getInventariosByUserID(UserId);
     }
 
+    getColaboradoresByIdInventario(InventarioId){
+        return inventarioRepository.getColaboradoresByIdInventario(InventarioId);
+    }
+
     createInventario(data){
         return inventarioRepository.create(data);
     }

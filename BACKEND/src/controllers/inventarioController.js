@@ -37,6 +37,19 @@ router.get('/user/:userID', async (req, res) => {
     }
 });
 
+router.get('/inventario/:inventarioID', async (req, res) => {
+    try {
+        const colaboradores = await inventarioService.getColaboradoresByIdInventario(req.params.inventarioID);
+        if (colaboradores) {
+            res.status(200).json(colaboradores);
+        } else {
+            res.status(404).json({ message: 'Colaboradores no encontrado por inventarioID' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Hubo un error al obtener los Colaboradores del Inventario', error: error.message });
+    }
+});
+
 router.post('/', async (req, res) => {
     try {
         const newInventario = await inventarioService.createInventario(req.body);
