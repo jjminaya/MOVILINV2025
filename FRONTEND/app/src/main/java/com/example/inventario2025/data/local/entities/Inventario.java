@@ -4,9 +4,10 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
 @Entity(tableName = "inventario")
-public class Inventario {
+public class Inventario implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "idInventario")
@@ -93,4 +94,6 @@ public class Inventario {
     public int getOwnerUserId() { return ownerUserId; }
 
     public void setOwnerUserId(int ownerUserId) { this.ownerUserId = ownerUserId; }
+
+    private static final long serialVersionUID = 1L;
 }
