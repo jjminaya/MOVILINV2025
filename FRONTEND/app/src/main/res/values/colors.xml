@@ -38,4 +38,6 @@
     <color name="toast_warning_background">#FFC107</color>
     <color name="toast_info_background">#2196F3</color>
 
+    <color name="colorWarning">#FFC107</color>
+
 </resources>

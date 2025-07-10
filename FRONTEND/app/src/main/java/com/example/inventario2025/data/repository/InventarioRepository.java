@@ -206,6 +206,13 @@ public class InventarioRepository {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     listener.onSuccess();
+                    IO_EXECUTOR.execute(() -> {
+                        Inventario existing = inventoryDao.getInventarioByIdSync(inventarioId);
+                        if (existing != null) {
+                            existing.setDescripcionInventario(newDescription);
+                            inventoryDao.insert(existing);
+                        }
+                    });
                 } else {
                     Log.e("InventarioRepository", "Error al actualizar inventario. Código: " + response.code() + ", Mensaje: " + response.message() + ", Body de error: " + (response.errorBody() != null ? response.errorBody().toString() : "N/A"));
                     listener.onFailure("Error al actualizar inventario: " + response.code());
@@ -220,8 +227,42 @@ public class InventarioRepository {
         });
     }
 
-    public void deleteInventario(int id, OnOperationCompleteListener listener) {
-        //por implementar
+    public void deleteInventario(int idInventario, final OnOperationCompleteListener listener) {
+        inventoryApiService.deleteInventario(idInventario).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    IO_EXECUTOR.execute(() -> {
+                        inventoryDao.deleteById(idInventario);
+                        if (listener != null) {
+                            listener.onSuccess();
+                        }
+                        Log.d(TAG, "Inventario " + idInventario + " eliminado exitosamente de la API y DB local.");
+                    });
+                } else {
+                    String errorMessage = "Error al eliminar inventario: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body", e);
+                        }
+                    }
+                    if (listener != null) {
+                        listener.onFailure(errorMessage);
+                    }
+                    Log.e(TAG, errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (listener != null) {
+                    listener.onFailure("Fallo de red al eliminar inventario: " + t.getMessage());
+                }
+                Log.e(TAG, "Fallo de red al eliminar inventario", t);
+            }
+        });
     }
 
     // obtener colaboradores por ID de inventario
