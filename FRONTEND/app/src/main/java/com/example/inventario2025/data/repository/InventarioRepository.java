@@ -7,6 +7,7 @@ import android.util.Log;
 import com.example.inventario2025.data.local.dao.InventarioDao;
 import com.example.inventario2025.data.local.entities.Colaborador;
 import com.example.inventario2025.data.local.entities.Inventario;
+import com.example.inventario2025.data.local.entities.Usuario;
 import com.example.inventario2025.data.remote.api.InventorioApiService;
 import com.example.inventario2025.data.remote.models.InventarioResponse;
 import com.example.inventario2025.data.remote.models.InventarioRequest;
@@ -39,8 +40,8 @@ public class InventarioRepository {
 
     // Metodo para obtener todos los inventarios (desde la API principal, luego a Room)
     public LiveData<List<Inventario>> getInventories() {
-        refreshInventoriesFromServer(); // Esto dispara la llamada a la API y guarda en Room
-        return inventoryDao.getAllInventories(); // Siempre observar Room para la UI
+        refreshInventoriesFromServer();
+        return inventoryDao.getAllInventories();
     }
 
     public void getInventoriesByUserId(int userId, OnOperationCompleteListener listener) {
@@ -54,7 +55,6 @@ public class InventarioRepository {
                     IO_EXECUTOR.execute(() -> {
                         inventoryDao.deleteAll(); // Borrará todos los inventarios locales
                         for (com.example.inventario2025.data.remote.models.InventarioResponse apiInv : apiInventarios) {
-                            // NUEVO LOG 2: Valor del rango ANTES de crear la entidad Room (en el método del Listener)
                             Log.d(TAG, "Listener_Method - API_Inv ID: " + apiInv.getIdInventario() + ", Rango_API: '" + apiInv.getRangoColaborador() + "'");
 
                             Inventario inventario = new Inventario(
@@ -62,11 +62,10 @@ public class InventarioRepository {
                                     apiInv.getDescripcionInventario(),
                                     apiInv.getElementosInventario(),
                                     apiInv.getEstado(),
-                                    apiInv.getRangoColaborador(), // Este valor viene directamente del API
-                                    userId // Este es el ownerUserId
+                                    apiInv.getRangoColaborador(),
+                                    userId
                             );
                             inventoryDao.insert(inventario);
-                            // NUEVO LOG 3: Valor del rango DESPUÉS de crear la entidad Room y justo ANTES de insertar (en el método del Listener)
                             Log.d(TAG, "Listener_Method - Room_Entity ID: " + inventario.getIdInventario() + ", Rango_Room_After_Conversion: '" + inventario.getRangoColaborador() + "'");
                         }
                     });
@@ -118,8 +117,6 @@ public class InventarioRepository {
         });
     }
 
-    // Metodo para obtener inventarios por ID de usuario (desde la API, luego a Room)
-    // Esto siempre recargará y luego la UI observará Room
     public LiveData<List<Inventario>> getInventoriesByUserId(int userId) {
         inventoryApiService.getInventariosByUserId(userId).enqueue(new Callback<List<InventarioResponse>>() {
             @Override
@@ -129,7 +126,6 @@ public class InventarioRepository {
                     Log.d(TAG, "API Response (LiveData method) RECEIVED for user " + userId + ". Count: " + response.body().size()); // NUEVO LOG 4
 
                     for (InventarioResponse apiResponse : response.body()) {
-                        // NUEVO LOG 5: Valor del rango ANTES de crear la entidad Room (en el método LiveData)
                         Log.d(TAG, "LiveData_Method - API_Inv ID: " + apiResponse.getIdInventario() + ", Rango_API: '" + apiResponse.getRangoColaborador() + "'");
 
                         inventoriesToInsert.add(new Inventario(
@@ -140,14 +136,12 @@ public class InventarioRepository {
                                 apiResponse.getRangoColaborador(),
                                 userId
                         ));
-                        // NUEVO LOG 6: Valor del rango DESPUÉS de crear la entidad Room (en el método LiveData)
                         Inventario tempInventario = inventoriesToInsert.get(inventoriesToInsert.size() - 1);
                         Log.d(TAG, "LiveData_Method - Room_Entity ID: " + tempInventario.getIdInventario() + ", Rango_Room_After_Conversion: '" + tempInventario.getRangoColaborador() + "'");
                     }
                     IO_EXECUTOR.execute(() -> {
-                        // Agregamos deleteAll aquí también para asegurar una base de datos limpia durante la depuración
                         inventoryDao.deleteAll();
-                        inventoryDao.insertAll(inventoriesToInsert); // Insertar/actualizar en Room
+                        inventoryDao.insertAll(inventoriesToInsert);
                     });
                 } else {
                     System.err.println("API Error (by user id - LiveData method): " + response.code() + " - " + response.message());
@@ -212,6 +206,13 @@ public class InventarioRepository {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     listener.onSuccess();
+                    IO_EXECUTOR.execute(() -> {
+                        Inventario existing = inventoryDao.getInventarioByIdSync(inventarioId);
+                        if (existing != null) {
+                            existing.setDescripcionInventario(newDescription);
+                            inventoryDao.insert(existing);
+                        }
+                    });
                 } else {
                     Log.e("InventarioRepository", "Error al actualizar inventario. Código: " + response.code() + ", Mensaje: " + response.message() + ", Body de error: " + (response.errorBody() != null ? response.errorBody().toString() : "N/A"));
                     listener.onFailure("Error al actualizar inventario: " + response.code());
@@ -226,8 +227,42 @@ public class InventarioRepository {
         });
     }
 
-    public void deleteInventario(int id, OnOperationCompleteListener listener) {
-        //por implementar
+    public void deleteInventario(int idInventario, final OnOperationCompleteListener listener) {
+        inventoryApiService.deleteInventario(idInventario).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    IO_EXECUTOR.execute(() -> {
+                        inventoryDao.deleteById(idInventario);
+                        if (listener != null) {
+                            listener.onSuccess();
+                        }
+                        Log.d(TAG, "Inventario " + idInventario + " eliminado exitosamente de la API y DB local.");
+                    });
+                } else {
+                    String errorMessage = "Error al eliminar inventario: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body", e);
+                        }
+                    }
+                    if (listener != null) {
+                        listener.onFailure(errorMessage);
+                    }
+                    Log.e(TAG, errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (listener != null) {
+                    listener.onFailure("Fallo de red al eliminar inventario: " + t.getMessage());
+                }
+                Log.e(TAG, "Fallo de red al eliminar inventario", t);
+            }
+        });
     }
 
     // obtener colaboradores por ID de inventario
@@ -260,7 +295,101 @@ public class InventarioRepository {
         });
     }
 
-    // Nueva interfaz para el listener de colaboradores
+    // Metodo para verificar si un usuario existe
+    public void checkUserExists(String username, OnUserCheckListener listener) {
+        inventoryApiService.checkUserExists(username).enqueue(new Callback<Usuario>() {
+            @Override
+            public void onResponse(Call<Usuario> call, Response<Usuario> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onUserChecked(response.body());
+                    Log.d(TAG, "Verificación de usuario '" + username + "': Valido=" + response.body().isValid() + ", ID=" + response.body().getIdUsuario());
+                } else {
+                    String errorMessage = "Error al verificar usuario: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body", e);
+                        }
+                    }
+                    listener.onUserCheckFailed(errorMessage);
+                    Log.e(TAG, errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Usuario> call, Throwable t) {
+                listener.onUserCheckFailed("Fallo de red al verificar usuario: " + t.getMessage());
+                Log.e(TAG, "Fallo de red al verificar usuario", t);
+            }
+        });
+    }
+
+    // Metodo para agregar un colaborador
+    public void addColaborador(int inventarioId, int idUsuario, String rangoColaborador, OnOperationCompleteListener listener) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("idInventario", inventarioId);
+        body.put("idUsuario", idUsuario);
+        body.put("rangoColaborador", rangoColaborador); // "COLAB"
+
+        inventoryApiService.addColaborador(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    listener.onSuccess();
+                    Log.d(TAG, "Colaborador agregado exitosamente a inventario " + inventarioId);
+                } else {
+                    String errorMessage = "Error al agregar colaborador: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body", e);
+                        }
+                    }
+                    listener.onFailure(errorMessage);
+                    Log.e(TAG, errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                listener.onFailure("Fallo de red al agregar colaborador: " + t.getMessage());
+                Log.e(TAG, "Fallo de red al agregar colaborador", t);
+            }
+        });
+    }
+
+    // Metodo para eliminar un colaborador
+    public void deleteColaborador(int idColaborador, OnOperationCompleteListener listener) {
+        inventoryApiService.deleteColaborador(idColaborador).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    listener.onSuccess();
+                    Log.d(TAG, "Colaborador " + idColaborador + " eliminado exitosamente.");
+                } else {
+                    String errorMessage = "Error al eliminar colaborador: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body", e);
+                        }
+                    }
+                    listener.onFailure(errorMessage);
+                    Log.e(TAG, errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                listener.onFailure("Fallo de red al eliminar colaborador: " + t.getMessage());
+                Log.e(TAG, "Fallo de red al eliminar colaborador", t);
+            }
+        });
+    }
+
     public interface OnColaboradoresLoadedListener {
         void onColaboradoresLoaded(List<Colaborador> colaboradores);
         void onColaboradoresLoadFailed(String message);
@@ -269,5 +398,10 @@ public class InventarioRepository {
     public interface OnOperationCompleteListener {
         void onSuccess();
         void onFailure(String message);
+    }
+
+    public interface OnUserCheckListener {
+        void onUserChecked(Usuario usuario);
+        void onUserCheckFailed(String message);
     }
 }
