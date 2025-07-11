@@ -20,6 +20,7 @@ import com.google.android.material.card.MaterialCardView;
 import androidx.appcompat.widget.PopupMenu;
 import android.view.MenuItem;
 import android.util.Log;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.databinding.InventorioListBinding;
@@ -88,6 +89,14 @@ public class InventorioListFragment extends Fragment implements ConfirmationDial
             @Override
             public void onDeleteClick(Inventario inventario) {
                 showDeleteConfirmationDialog(inventario.getIdInventario(), inventario.getDescripcionInventario());
+            }
+
+            @Override
+            public void onItemClick(Inventario inventario) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("inventario", inventario); // El objeto Inventario debe ser Serializable
+                NavHostFragment.findNavController(InventorioListFragment.this)
+                        .navigate(R.id.action_inventorioListFragment_to_elementosListFragment, bundle);
             }
         });
     }
