@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.inventario2025.R;
 import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.databinding.InventorioItemBinding;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class InventarioAdapter extends RecyclerView.Adapter<InventarioAdapter.In
         void onEditClick(Inventario inventario);
         void onAddCollaboratorClick(Inventario inventario);
         void onDeleteClick(Inventario inventario);
+        void onItemClick(Inventario inventario);
     }
 
     public void setOnItemActionListener(OnItemActionListener listener) {
@@ -77,6 +79,13 @@ public class InventarioAdapter extends RecyclerView.Adapter<InventarioAdapter.In
                 holder.toggleActionsButton.setImageResource(R.drawable.collapse_all_24px);
             }
         });
+
+        // NUEVO: Listener para el clic en el MaterialCardView completo
+        holder.materialCardView.setOnClickListener(v -> {
+            if (onItemActionListener != null) {
+                onItemActionListener.onItemClick(currentInventario);
+            }
+        });
     }
 
     @Override
@@ -93,6 +102,7 @@ public class InventarioAdapter extends RecyclerView.Adapter<InventarioAdapter.In
         private final ImageButton deleteButton;
         private final ImageButton toggleActionsButton;
         private final LinearLayout actionButtonsContainer;
+        private final MaterialCardView materialCardView;
 
         // Constructor que recibe el objeto de binding
         public InventarioViewHolder(@NonNull View itemView) {
@@ -105,6 +115,7 @@ public class InventarioAdapter extends RecyclerView.Adapter<InventarioAdapter.In
             deleteButton = itemView.findViewById(R.id.button_delete_inventory);
             toggleActionsButton = itemView.findViewById(R.id.button_toggle_actions);
             actionButtonsContainer = itemView.findViewById(R.id.action_buttons_container);
+            materialCardView = (MaterialCardView) itemView;
         }
 
         // Metodo bind que recibe el Inventario y el listener
