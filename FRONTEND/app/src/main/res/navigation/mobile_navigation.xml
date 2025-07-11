@@ -10,6 +10,19 @@
         android:name="com.example.inventario2025.ui.listaInventorio.InventorioListFragment"
         android:label="Mis Inventarios"
         tools:layout="@layout/inventorio_list" >
+        <action
+            android:id="@+id/action_inventorioListFragment_to_elementosListFragment"
+            app:destination="@id/elementosListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/elementosListFragment"
+        android:name="com.example.inventario2025.ui.listaElementos.ElementosListFragment"
+        android:label="Elementos del Inventario"
+        tools:layout="@layout/fragment_elementos_list">
+        <argument
+            android:name="inventario"
+            app:argType="com.example.inventario2025.data.local.entities.Inventario" />
     </fragment>
 
 <!--    <fragment-->
