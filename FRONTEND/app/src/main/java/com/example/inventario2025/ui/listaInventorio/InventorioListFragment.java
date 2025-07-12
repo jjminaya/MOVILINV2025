@@ -20,16 +20,20 @@ import com.google.android.material.card.MaterialCardView;
 import androidx.appcompat.widget.PopupMenu;
 import android.view.MenuItem;
 import android.util.Log;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.databinding.InventorioListBinding;
 import com.example.inventario2025.ui.adapters.InventarioAdapter;
 import com.example.inventario2025.ui.dialogos.CrearInventarioDialogFragment;
 import com.example.inventario2025.R;
+import com.example.inventario2025.utils.ToastUtils;
+import com.example.inventario2025.ui.dialogos.ConfirmationDialogFragment;
+
 
 import java.util.List;
 
-public class InventorioListFragment extends Fragment {
+public class InventorioListFragment extends Fragment implements ConfirmationDialogFragment.ConfirmationDialogListener { // CAMBIO AQUI: Implementar la interfaz {
 
     private static final String TAG = "InventarioListFragment";
     private InventorioListBinding binding;
@@ -38,6 +42,7 @@ public class InventorioListFragment extends Fragment {
     private MaterialCardView errorCardView;
     private TextView errorMessageTextView;
     private InventorioListViewModel.SortCriteria currentSelectedSort = InventorioListViewModel.SortCriteria.NONE;
+    private int currentUserId = 1;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -61,6 +66,7 @@ public class InventorioListFragment extends Fragment {
         setupSearchListener();
 
         inventarioListViewModel.setFilterType(InventorioListViewModel.FilterType.OWNED);
+        inventarioListViewModel.loadInventoriesForCurrentUser(currentUserId);
     }
     private void setupRecyclerView() {
         inventarioAdapter = new InventarioAdapter();
@@ -82,8 +88,15 @@ public class InventorioListFragment extends Fragment {
 
             @Override
             public void onDeleteClick(Inventario inventario) {
-                Toast.makeText(getContext(), "Eliminar: " + inventario.getDescripcionInventario(), Toast.LENGTH_SHORT).show();
-                // Aqui ira la logica para eliminar el inventario
+                showDeleteConfirmationDialog(inventario.getIdInventario(), inventario.getDescripcionInventario());
+            }
+
+            @Override
+            public void onItemClick(Inventario inventario) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("inventario", inventario); // El objeto Inventario debe ser Serializable
+                NavHostFragment.findNavController(InventorioListFragment.this)
+                        .navigate(R.id.action_inventorioListFragment_to_elementosListFragment, bundle);
             }
         });
     }
@@ -96,6 +109,10 @@ public class InventorioListFragment extends Fragment {
 
         // Observar los mensajes de error del ViewModel
         inventarioListViewModel.errorMessage.observe(getViewLifecycleOwner(), errorMessage -> {
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                ToastUtils.showErrorToast(getParentFragmentManager(), errorMessage);
+                inventarioListViewModel.clearErrorMessage();
+            }
             updateUiVisibility();
         });
 
@@ -113,6 +130,22 @@ public class InventorioListFragment extends Fragment {
         inventarioListViewModel.getCurrentSortCriteria().observe(getViewLifecycleOwner(), criteria -> {
             currentSelectedSort = criteria;
             android.util.Log.d(TAG, "Criterio de ordenamiento actualizado en Fragment por ViewModel: " + criteria);
+        });
+
+        inventarioListViewModel.getDeleteInventarioSuccess().observe(getViewLifecycleOwner(), isSuccess -> {
+            if (isSuccess != null) {
+                if (isSuccess) {
+                    ToastUtils.showSuccessToast(getParentFragmentManager(), "Inventario eliminado correctamente.");
+                }
+                inventarioListViewModel.clearDeleteInventarioSuccess();
+            }
+        });
+
+        inventarioListViewModel.infoMessage.observe(getViewLifecycleOwner(), infoMessage -> {
+            if (infoMessage != null && !infoMessage.isEmpty()) {
+                ToastUtils.showInfoToast(getParentFragmentManager(), infoMessage);
+                inventarioListViewModel.clearInfoMessage();
+            }
         });
     }
 
@@ -247,6 +280,25 @@ public class InventorioListFragment extends Fragment {
             return true;
         });
         popup.show();
+    }
+
+    private void showDeleteConfirmationDialog(int inventarioId, String inventarioDescription) {
+        String title = "¿Estás seguro(a)?";
+        String message = "Al aceptar eliminará el inventario \"" + inventarioDescription + "\" de su registro permanentemente.";
+
+        ConfirmationDialogFragment dialogFragment = ConfirmationDialogFragment.newInstance(
+                title,
+                message,
+                inventarioId,
+                R.drawable.warning_24px
+        );
+        dialogFragment.setConfirmationDialogListener(this);
+        dialogFragment.show(getParentFragmentManager(), "DeleteConfirmationDialog");
+    }
+
+    @Override
+    public void onConfirmAction(int inventarioId) {
+        inventarioListViewModel.deleteInventario(inventarioId, currentUserId);
     }
 
     @Override
