@@ -22,11 +22,12 @@
         tools:layout="@layout/fragment_elementos_list">
         <argument
             android:name="inventario"
-            app:argType="com.example.inventario2025.data.local.entities.Inventario" />
+            app:argType="com.example.inventario2025.data.local.entities.Inventario"
+            app:nullable="true" />
     </fragment>
 
-<!--    <fragment-->
-<!--        android:id="@+id/navigation_profile"-->
-<!--        android:name="com.example.inventario2025.ui.profile.ProfileFragment" android:label="Perfil de Usuario"-->
-<!--        tools:layout="@layout/fragment_profile" /> -->
+    <!--    <fragment-->
+    <!--        android:id="@+id/navigation_profile"-->
+    <!--        android:name="com.example.inventario2025.ui.profile.ProfileFragment" android:label="Perfil de Usuario"-->
+    <!--        tools:layout="@layout/fragment_profile" /> -->
 </navigation>
