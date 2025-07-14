@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.inventario2025.R;
 import com.example.inventario2025.data.remote.api.ApiClient;
 import com.example.inventario2025.data.remote.api.LoginService;
+import com.example.inventario2025.data.remote.models.LoginRequest;
 import com.example.inventario2025.data.remote.models.Usuario;
 import com.example.inventario2025.ui.MainActivity;
 import com.example.inventario2025.utils.SharedPrefManager;
@@ -26,14 +27,13 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText etUsername, etPassword;
-    Button btnLogin;
+    private EditText etUsername, etPassword;
+    private Button btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState); // ✅ Llamado al principio obligatorio
+        super.onCreate(savedInstanceState);
 
-        // Verificar si ya está logueado antes de cargar el layout
         SharedPrefManager prefManager = new SharedPrefManager(this);
         if (prefManager.estaLogueado()) {
             startActivity(new Intent(this, MainActivity.class));
@@ -66,8 +66,10 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        LoginService service = ApiClient.getClient().create(LoginService.class);
-        Call<Usuario> call = service.login(user, pass);
+        LoginService service = ApiClient.getLoginService();
+        LoginRequest request = new LoginRequest(user, pass);  // ✅ Usamos JSON como cuerpo
+
+        Call<Usuario> call = service.login(request);
 
         call.enqueue(new Callback<Usuario>() {
             @Override
@@ -75,12 +77,10 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Usuario usuario = response.body();
 
-                    // ✅ Logs para verificar los datos del usuario recibido
                     Log.d("LOGIN_DEBUG", "ID: " + usuario.getIdUsuario());
                     Log.d("LOGIN_DEBUG", "Username: " + usuario.getUsername());
                     Log.d("LOGIN_DEBUG", "TipoUsuario: " + usuario.getTipoUsuario());
 
-                    // Guardar datos del usuario
                     SharedPrefManager prefManager = new SharedPrefManager(LoginActivity.this);
                     prefManager.guardarUsuario(usuario);
 
@@ -89,14 +89,14 @@ public class LoginActivity extends AppCompatActivity {
                     finish();
                 } else {
                     Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
-                    Log.d("LOGIN_DEBUG", "Respuesta error: código " + response.code());
+                    Log.d("LOGIN_DEBUG", "Código de error: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<Usuario> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Error de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("LOGIN_DEBUG", "Error de red o servidor", t);
+                Log.e("LOGIN_DEBUG", "Error en red o servidor", t);
             }
         });
     }

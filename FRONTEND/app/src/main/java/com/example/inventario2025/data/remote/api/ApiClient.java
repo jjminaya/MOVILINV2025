@@ -4,7 +4,12 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://192.168.1.101:3000/"; // IP local actual del backend
+
+    // ✅ Producción (servidor web)
+    private static final String BASE_URL = "http://200.234.238.128/api/";
+    // Local solo si pruebas localmente
+    // private static final String BASE_URL = "http://192.168.1.101:3000/";
+
     private static Retrofit retrofit;
 
     public static Retrofit getClient() {
@@ -16,4 +21,14 @@ public class ApiClient {
         }
         return retrofit;
     }
+
+    public static LoginService getLoginService() {
+        return getClient().create(LoginService.class);
+    }
+
+    public static UsuarioService getUsuarioService() {
+        return getClient().create(UsuarioService.class);
+    }
+
+    // Puedes seguir agregando más servicios aquí
 }

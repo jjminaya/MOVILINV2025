@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ✅ Fuera del <application> -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -14,9 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Inventario2025"
         android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
 
-        <!-- Pantalla de inicio: Login -->
         <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true">
@@ -26,12 +27,10 @@
             </intent-filter>
         </activity>
 
-        <!-- Pantalla principal (post-login) -->
         <activity
             android:name=".ui.MainActivity"
             android:exported="true" />
 
         <activity android:name=".ui.profile.EditarPerfilActivity" />
-
     </application>
 </manifest>
