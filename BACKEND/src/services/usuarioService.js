@@ -20,6 +20,11 @@ class UsuarioService {
   async delete(id) {
     return await usuarioRepository.delete(id);
   }
+
+    async login(username, password) {
+    return await usuarioRepository.findByUsernameAndPassword(username, password);
+  }
+
 }
 
 module.exports = new UsuarioService();

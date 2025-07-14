@@ -1,4 +1,6 @@
 const mysql = require('mysql2/promise');
+
+// Pool de conexión
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -9,36 +11,42 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-class CrudRepository{
-    constructor(model){
+class CrudRepository {
+    constructor(model) {
+        if (!model || !model.tableName || !model.pk) {
+            throw new Error('El modelo debe contener tableName y pk definidos.');
+        }
+
         this.model = model;
         this.tableName = model.tableName;
         this.pk = model.pk;
         this.pool = pool;
     }
 
-    async findAll(){
-        const [rows] = await pool.query(`SELECT * FROM ${this.tableName} WHERE estado = 1`);
+    async findAll() {
+        const [rows] = await this.pool.query(`SELECT * FROM ${this.tableName} WHERE estado = 1`);
         return rows;
     }
 
-    async findById(id){
-        const [rows] = await pool.query(`SELECT * FROM ${this.tableName} where ${this.pk} = ?`,[id]);
+    async findById(id) {
+        const [rows] = await this.pool.query(`SELECT * FROM ${this.tableName} WHERE ${this.pk} = ?`, [id]);
         return rows[0];
     }
 
-    async create(data){
-        const [result] = await pool.query(`INSERT INTO ${this.tableName} SET ?`, data);
-        return {[this.pk] : result.insertId,...data};
+    async create(data) {
+        const [result] = await this.pool.query(`INSERT INTO ${this.tableName} SET ?`, data);
+        return { [this.pk]: result.insertId, ...data };
     }
 
-    async update(id, data){
-        await pool.query(`UPDATE ${this.tableName} SET ? WHERE ${this.pk}=?`, [data,id]);
+    async update(id, data) {
+        await this.pool.query(`UPDATE ${this.tableName} SET ? WHERE ${this.pk} = ?`, [data, id]);
         return this.findById(id);
     }
 
-    async delete(id){
-        const [result] = await pool.query(`UPDATE ${this.tableName} SET estado = 0 WHERE ${this.pk} =?`, [id]);
-        return result.affectedRows>0;
+    async delete(id) {
+        const [result] = await this.pool.query(`UPDATE ${this.tableName} SET estado = 0 WHERE ${this.pk} = ?`, [id]);
+        return result.affectedRows > 0;
     }
-}module.exports = CrudRepository;
+}
+
+module.exports = CrudRepository;
