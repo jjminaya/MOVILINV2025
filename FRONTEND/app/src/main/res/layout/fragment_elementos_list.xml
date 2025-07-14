@@ -37,48 +37,26 @@
             android:drawablePadding="8dp"
             android:background="@drawable/rounded_edittext_background"
             android:layout_marginBottom="8dp"
-            android:inputType="text"
-            android:drawableEnd="@drawable/photo_camera_24px" />
-
-        <ImageView
-            android:id="@+id/filter_elements_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:padding="8dp"
-            android:src="@drawable/filter_alt_24px"
-            android:contentDescription="Ordenar elementos" />
+            android:inputType="text" />
 
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewElements"
+        android:id="@+id/recycler_view_elements"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/top_elements_controls_layout"
+        app:layout_constraintTop_toBottomOf="@+id/top_elements_controls_layout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:clipToPadding="false"
+        tools:listitem="@layout/item_elemento"
         android:paddingBottom="64dp"
-        tools:listitem="@layout/item_elemento" />
+        android:clipToPadding="false" />
 
     <ProgressBar
-        android:id="@+id/elements_progressBar"
+        android:id="@+id/elements_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <TextView
-        android:id="@+id/elements_textViewNoData"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No hay elementos disponibles para este inventario."
-        android:textSize="16sp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -86,25 +64,24 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/elements_errorCardView"
+        android:id="@+id/elements_no_data_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
         android:visibility="gone"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="?attr/colorSurface"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center">
+            android:gravity="center"
+            android:padding="24dp">
 
             <ImageView
                 android:id="@+id/elements_errorIcon"
