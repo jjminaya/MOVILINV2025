@@ -1,14 +1,24 @@
 package com.example.inventario2025.ui.listaElementos;
 
+import android.annotation.SuppressLint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.example.inventario2025.ui.dialogos.ConfirmationDialogFragment;
+import com.example.inventario2025.ui.dialogos.CrearElementoDialogFragment;
 import com.example.inventario2025.utils.ToastUtils;
 
 import com.example.inventario2025.R;
@@ -19,12 +29,17 @@ import com.example.inventario2025.ui.adapters.ElementosAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ElementosListFragment extends Fragment {
+public class ElementosListFragment extends Fragment implements
+        ElementosAdapter.OnElementoActionListener,
+        CrearElementoDialogFragment.OnElementoCreatedListener,
+        ConfirmationDialogFragment.ConfirmationDialogListener{
 
     private FragmentElementosListBinding binding;
-    private Inventario currentInventario;
+    private ElementosListViewModel elementosListViewModel;
     private ElementosAdapter elementosAdapter;
+    private Inventario currentInventario;
 
     public ElementosListFragment() {
     }
@@ -44,106 +59,178 @@ public class ElementosListFragment extends Fragment {
         return binding.getRoot();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        setupRecyclerView();
+        elementosListViewModel = new ViewModelProvider(this).get(ElementosListViewModel.class);
+
+        binding.recyclerViewElements.setLayoutManager(new LinearLayoutManager(getContext()));
+        elementosAdapter = new ElementosAdapter();
+        binding.recyclerViewElements.setAdapter(elementosAdapter);
+        elementosAdapter.setOnElementoActionListener(this);
 
         if (currentInventario != null) {
             binding.inventoryTitleElements.setText("Elementos de: " + currentInventario.getDescripcionInventario());
-            loadSampleElements(currentInventario.getIdInventario());
+            elementosListViewModel.setCurrentInventarioId(currentInventario.getIdInventario());
         } else {
-            binding.inventoryTitleElements.setText("Elementos");
-            ToastUtils.showErrorToast(getParentFragmentManager(), "No se ha seleccionado un inventario para ver sus elementos.");
-
-            binding.recyclerViewElements.setVisibility(View.GONE);
-            binding.elementsTextViewNoData.setVisibility(View.GONE);
-            binding.elementsErrorCardView.setVisibility(View.GONE);
-            binding.elementsProgressBar.setVisibility(View.GONE);
+            binding.inventoryTitleElements.setText("Error: Inventario no encontrado.");
+            binding.elementsNoDataCard.setVisibility(View.VISIBLE);
+            binding.elementsErrorMessageTextView.setText("No se pudo cargar el inventario.");
         }
 
-        setupClickListeners();
-        setupSearchListener();
-    }
-
-    private void setupRecyclerView() {
-        elementosAdapter = new ElementosAdapter();
-        binding.recyclerViewElements.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerViewElements.setAdapter(elementosAdapter);
-
-        elementosAdapter.setOnElementoActionListener(new ElementosAdapter.OnElementoActionListener() {
-            @Override
-            public void onEditElementClick(Elemento elemento) {
-                Toast.makeText(getContext(), "Editar elemento: " + elemento.getDescripcionElemento(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onPrintCodeClick(Elemento elemento) {
-                Toast.makeText(getContext(), "Imprimir unicdoe de: " + elemento.getDescripcionElemento(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onDeleteElementClick(Elemento elemento) {
-                Toast.makeText(getContext(), "Eliminar elemento: " + elemento.getDescripcionElemento(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onItemClick(Elemento elemento) {
-                Toast.makeText(getContext(), "Clic en elemento: " + elemento.getDescripcionElemento(), Toast.LENGTH_SHORT).show();
+        elementosListViewModel.filteredElements.observe(getViewLifecycleOwner(), elementos -> {
+            if (elementos != null && !elementos.isEmpty()) {
+                elementosAdapter.setElementoList(elementos);
+                binding.recyclerViewElements.setVisibility(View.VISIBLE);
+                binding.elementsNoDataCard.setVisibility(View.GONE);
+            } else {
+                elementosAdapter.setElementoList(new ArrayList<>());
+                binding.recyclerViewElements.setVisibility(View.GONE);
+                binding.elementsNoDataCard.setVisibility(View.VISIBLE);
+                if (elementosListViewModel.searchTerm.getValue() != null && !elementosListViewModel.searchTerm.getValue().isEmpty()) {
+                    binding.elementsErrorMessageTextView.setText("Oops... No se encontró elemento con este nombre.");
+                } else {
+                    binding.elementsErrorMessageTextView.setText("No hay elementos en este inventario.");
+                }
             }
         });
-    }
 
-    private void setupClickListeners() {
-        // Configurar el listener para el botón de la cámara (ejemplo)
+        elementosListViewModel.isLoading.observe(getViewLifecycleOwner(), isLoading -> {
+            binding.elementsProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
+        elementosListViewModel.errorMessage.observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                ToastUtils.showErrorToast(getParentFragmentManager(), message);
+                elementosListViewModel.clearErrorMessage();
+            }
+        });
+
+        elementosListViewModel.successMessage.observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                ToastUtils.showSuccessToast(getParentFragmentManager(), message);
+                elementosListViewModel.clearSuccessMessage();
+            }
+        });
+
+        elementosListViewModel.infoMessage.observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                ToastUtils.showInfoToast(getParentFragmentManager(), message);
+                elementosListViewModel.clearInfoMessage();
+            }
+        });
+
+        elementosListViewModel.createElementoSuccess.observe(getViewLifecycleOwner(), isSuccess -> {
+            if (isSuccess != null && isSuccess) {
+                elementosListViewModel.clearCreateElementoSuccess();
+            }
+        });
+
+        elementosListViewModel.updateElementoSuccess.observe(getViewLifecycleOwner(), isSuccess -> {
+            if (isSuccess != null && isSuccess) {
+                elementosListViewModel.clearUpdateElementoSuccess();
+            }
+        });
+
+        elementosListViewModel.deleteElementoSuccess.observe(getViewLifecycleOwner(), isSuccess -> {
+            if (isSuccess != null && isSuccess) {
+                elementosListViewModel.clearDeleteElementoSuccess();
+            }
+        });
+
         binding.searchElementsEditText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_24px, 0, R.drawable.photo_camera_24px, 0);
-        binding.searchElementsEditText.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Botón de cámara clicado", Toast.LENGTH_SHORT).show();
-        });
+        binding.searchElementsEditText.setOnTouchListener((v, event) -> {
+            final int DRAWABLE_RIGHT = 2;
+            Drawable cameraDrawable = binding.searchElementsEditText.getCompoundDrawables()[DRAWABLE_RIGHT];
 
-        // Configurar el listener para el botón de filtro (ejemplo)
-        binding.filterElementsButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Botón de filtro clicado", Toast.LENGTH_SHORT).show();
+            if (cameraDrawable != null && event.getAction() == MotionEvent.ACTION_UP) {
+                int clickableAreaWidth = (int) (48 * getResources().getDisplayMetrics().density);
+                int clickableLeftBound = binding.searchElementsEditText.getRight() - clickableAreaWidth;
+                if (event.getRawX() >= clickableLeftBound) {
+                    ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo cámara para escanear...");
+                    return true;
+                }
+            }
+            return false;
         });
 
         binding.btnAddElement.setOnClickListener(v -> {
             if (currentInventario != null) {
-                Toast.makeText(getContext(), "Agregando nuevo elemento al inventario: " + currentInventario.getDescripcionInventario(), Toast.LENGTH_SHORT).show();
+                CrearElementoDialogFragment dialogFragment = CrearElementoDialogFragment.newInstance(currentInventario);
+                dialogFragment.setOnElementoCreatedListener(this);
+                dialogFragment.show(getParentFragmentManager(), "CrearElementoDialogFragment");
             } else {
-                Toast.makeText(getContext(), "Selecciona un inventario para agregar elementos.", Toast.LENGTH_SHORT).show();
+                ToastUtils.showErrorToast(getParentFragmentManager(), "No se puede agregar elemento. Información de inventario no disponible.");
+            }
+        });
+
+        binding.searchElementsEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                elementosListViewModel.searchElements(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
             }
         });
     }
 
-    private void setupSearchListener() {
+    @Override
+    public void onItemClick(Elemento elemento) {
+        //AQUI ENTRA JESUS
+        ToastUtils.showInfoToast(getParentFragmentManager(), "Elemento clicado: " + elemento.getDescripcionElemento());
     }
 
-    private void loadSampleElements(int inventarioId) {
-        List<Elemento> sampleElements = new ArrayList<>();
-        if (inventarioId == 1) { // ESTO SE BORRA CUANDO VENGA DESDE LA API
-            sampleElements.add(new Elemento(101, 1, "Teclado mecánico RGB", 5, 1));
-            sampleElements.add(new Elemento(102, 1, "Monitor curvo 27 pulgadas", 2, 1));
-            sampleElements.add(new Elemento(103, 1, "Mouse ergonómico inalámbrico", 10, 1));
-        } else if (inventarioId == 2) {
-            sampleElements.add(new Elemento(201, 2, "Impresora multifuncional", 1, 1));
-            sampleElements.add(new Elemento(202, 2, "Paquete de papel A4", 50, 1));
-        } else {
-            // No hay elementos para este inventario de prueba
-        }
-
-        if (sampleElements.isEmpty()) {
-            binding.elementsTextViewNoData.setVisibility(View.VISIBLE);
-            binding.recyclerViewElements.setVisibility(View.GONE);
-        } else {
-            elementosAdapter.setElementoList(sampleElements);
-            binding.elementsTextViewNoData.setVisibility(View.GONE);
-            binding.recyclerViewElements.setVisibility(View.VISIBLE);
-        }
-        binding.elementsProgressBar.setVisibility(View.GONE);
-        binding.elementsErrorCardView.setVisibility(View.GONE);
+    @Override
+    public void onEditElementClick(Elemento elemento) {
+        //AQUI ENTRA JESUS
+        ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo vista de editar: " + elemento.getDescripcionElemento());
     }
 
+    @Override
+    public void onPrintCodeClick(Elemento elemento) {
+        // AQUI ENTRA JESUS
+        ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo vista de impresion: " + elemento.getDescripcionElemento());
+    }
+
+    @Override
+    public void onDeleteElementClick(Elemento elemento) {
+        String title = "¿Estás seguro(a)?";
+        String message = "Al aceptar eliminará el elemento \"" + elemento.getDescripcionElemento() + "\" de este inventario permanentemente.";
+
+        ConfirmationDialogFragment dialogFragment = ConfirmationDialogFragment.newInstance(
+                title,
+                message,
+                elemento.getIdElemento(),
+                R.drawable.warning_24px
+        );
+        dialogFragment.setConfirmationDialogListener(this);
+        dialogFragment.show(getParentFragmentManager(), "DeleteElementoConfirmationDialog");
+    }
+
+    @Override
+    public void onElementoCreated(Elemento elemento) {
+        elementosListViewModel.addElemento(elemento);
+    }
+
+    // Implementación de la interfaz OnElementoUpdatedListener
+//    @Override
+//    public void onElementoUpdated(Elemento elemento) {
+//        // AQUI ENTRA JESUS
+//        elementosListViewModel.updateElemento(elemento);
+//    }
+
+    @Override
+    public void onConfirmAction(int id) {
+        elementosListViewModel.deleteElemento(id);
+    }
 
     @Override
     public void onDestroyView() {

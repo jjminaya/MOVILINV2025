@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.inventario2025.R;
 import com.example.inventario2025.data.local.entities.Elemento;
 import com.example.inventario2025.databinding.ItemElementoBinding;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,8 +79,7 @@ public class ElementosAdapter extends RecyclerView.Adapter<ElementosAdapter.Elem
             }
         });
 
-        // Listener para el clic en el ítem completo
-        holder.itemView.setOnClickListener(v -> {
+        holder.materialCardView.setOnClickListener(v -> {
             if (onItemActionListener != null) {
                 onItemActionListener.onItemClick(currentElemento);
             }
@@ -99,6 +99,7 @@ public class ElementosAdapter extends RecyclerView.Adapter<ElementosAdapter.Elem
         private final ImageButton deleteButton;
         private final ImageButton toggleActionsButton;
         private final LinearLayout actionButtonsContainer;
+        private final MaterialCardView materialCardView;
 
         public ElementoViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -109,6 +110,7 @@ public class ElementosAdapter extends RecyclerView.Adapter<ElementosAdapter.Elem
             deleteButton = itemView.findViewById(R.id.button_delete_element);
             toggleActionsButton = itemView.findViewById(R.id.button_toggle_element_actions);
             actionButtonsContainer = itemView.findViewById(R.id.element_action_buttons_container);
+            materialCardView = (MaterialCardView) itemView;
         }
 
         public void bind(Elemento elemento) {
