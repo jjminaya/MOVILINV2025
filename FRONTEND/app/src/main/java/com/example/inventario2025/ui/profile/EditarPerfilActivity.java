@@ -20,11 +20,11 @@ import retrofit2.Response;
 
 public class EditarPerfilActivity extends AppCompatActivity {
 
-    EditText etUsername, etPassword;
-    Button btnGuardar;
+    private EditText etUsername, etPassword;
+    private Button btnGuardar;
 
-    SharedPrefManager sharedPrefManager;
-    Usuario usuarioActual;
+    private SharedPrefManager sharedPrefManager;
+    private Usuario usuarioActual;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,21 +38,32 @@ public class EditarPerfilActivity extends AppCompatActivity {
         sharedPrefManager = new SharedPrefManager(this);
         usuarioActual = sharedPrefManager.obtenerUsuario();
 
+        if (usuarioActual == null || usuarioActual.getIdUsuario() == 0) {
+            Toast.makeText(this, "Error: Usuario no válido", Toast.LENGTH_LONG).show();
+            finish(); // Cierra la actividad
+            return;
+        }
+
         etUsername.setText(usuarioActual.getUsername());
 
         btnGuardar.setOnClickListener(v -> {
             String nuevoUsername = etUsername.getText().toString().trim();
             String nuevaPassword = etPassword.getText().toString().trim();
 
-            if (nuevoUsername.isEmpty() || nuevaPassword.isEmpty()) {
-                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
+            if (nuevoUsername.isEmpty()) {
+                etUsername.setError("Campo obligatorio");
+                return;
+            }
+
+            if (nuevaPassword.isEmpty()) {
+                etPassword.setError("Campo obligatorio");
                 return;
             }
 
             usuarioActual.setUsername(nuevoUsername);
             usuarioActual.setPassword(nuevaPassword);
 
-            UsuarioService service = ApiClient.getClient().create(UsuarioService.class);
+            UsuarioService service = ApiClient.getUsuarioService();
             Call<Usuario> call = service.actualizarUsuario(usuarioActual.getIdUsuario(), usuarioActual);
 
             call.enqueue(new Callback<Usuario>() {
@@ -61,23 +72,21 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         sharedPrefManager.guardarUsuario(response.body());
 
-                        // ✅ Mostrar mensaje
                         Toast.makeText(EditarPerfilActivity.this, "Perfil actualizado correctamente", Toast.LENGTH_SHORT).show();
 
-                        // ✅ Volver al fragmento de perfil
-                        Intent intent = new Intent();
-                        setResult(RESULT_OK, intent);
-                        finish(); // cierra esta pantalla y vuelve al ProfileFragment
+                        // Devuelve resultado al fragmento anterior
+                        setResult(RESULT_OK, new Intent());
+                        finish();
                     } else if (response.code() == 409) {
                         Toast.makeText(EditarPerfilActivity.this, "El nombre de usuario ya existe", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(EditarPerfilActivity.this, "Error al actualizar", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditarPerfilActivity.this, "Error al actualizar: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Usuario> call, Throwable t) {
-                    Toast.makeText(EditarPerfilActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditarPerfilActivity.this, "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         });

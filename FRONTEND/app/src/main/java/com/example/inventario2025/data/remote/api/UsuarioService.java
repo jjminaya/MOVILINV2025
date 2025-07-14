@@ -7,10 +7,12 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface UsuarioService {
+
+    // ✅ Actualiza los datos de un usuario por su ID
+    // Endpoint: PUT http://200.234.238.128/api/usuarios/{id}
     @PUT("usuarios/{id}")
     Call<Usuario> actualizarUsuario(
             @Path("id") int id,
             @Body Usuario usuario
     );
 }
-
