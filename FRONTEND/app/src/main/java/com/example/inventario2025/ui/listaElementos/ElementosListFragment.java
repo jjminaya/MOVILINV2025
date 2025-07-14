@@ -183,14 +183,27 @@ public class ElementosListFragment extends Fragment implements
     }
 
     @Override
-    public void onItemClick(Elemento elemento) {
-        //AQUI ENTRA JESUS
+        public void onItemClick(Elemento elemento) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("elemento", elemento);
+
+        DetalleElementoFragment detalleFragment = new DetalleElementoFragment();
+        detalleFragment.setArguments(bundle);
+
+        getParentFragmentManager()
+                .beginTransaction()
+                .replace(R.id.nav_host_fragment_activity_main, detalleFragment)
+                .addToBackStack(null)
+                .commit();
+
         ToastUtils.showInfoToast(getParentFragmentManager(), "Elemento clicado: " + elemento.getDescripcionElemento());
     }
+
 
     @Override
     public void onEditElementClick(Elemento elemento) {
         //AQUI ENTRA JESUS
+
         ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo vista de editar: " + elemento.getDescripcionElemento());
     }
 
