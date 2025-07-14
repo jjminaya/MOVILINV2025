@@ -38,6 +38,7 @@ android {
 
 dependencies {
 
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -57,9 +58,13 @@ dependencies {
     // RecyclerView
     implementation(libs.recyclerview)
 
+
+
     // LiveData & ViewModel
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
+
+
 
     // Si el conflicto de lifecycle-common persiste, puedes forzarlo aquí
     // implementation(libs.lifecycle.common) // Descomenta si necesitas forzar la versión
