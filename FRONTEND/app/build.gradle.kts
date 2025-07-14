@@ -26,6 +26,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -38,18 +39,17 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation("androidx.cardview:cardview:1.0.0")
 
     // Room
     implementation(libs.room.runtime)
-    add("annotationProcessor", libs.room.compiler)
+    annotationProcessor(libs.room.compiler) // ✅ CORRECTO
 
     // Retrofit & Gson
     implementation(libs.retrofit.core)
@@ -62,9 +62,6 @@ dependencies {
     // LiveData & ViewModel
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
-
-    // Si el conflicto de lifecycle-common persiste, puedes forzarlo aquí
-    // implementation(libs.lifecycle.common) // Descomenta si necesitas forzar la versión
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
