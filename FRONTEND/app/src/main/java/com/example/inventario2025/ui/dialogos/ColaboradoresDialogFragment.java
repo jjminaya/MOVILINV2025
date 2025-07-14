@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +19,7 @@ import com.example.inventario2025.data.local.entities.Colaborador;
 import com.example.inventario2025.databinding.DialogColaboradoresBinding;
 import com.example.inventario2025.ui.adapters.ColaboradorAdapter;
 import com.example.inventario2025.ui.listaInventorio.InventorioListViewModel;
+import com.example.inventario2025.utils.ToastUtils;
 
 import java.util.List;
 
@@ -62,7 +62,14 @@ public class ColaboradoresDialogFragment extends DialogFragment {
         inventarioListViewModel = new ViewModelProvider(requireActivity()).get(InventorioListViewModel.class);
 
         // Configurar el título del diálogo
-        binding.textViewColaboradoresTitle.setText("Colaboradores de: " + currentInventario.getDescripcionInventario());
+        if (currentInventario != null) {
+            binding.textViewColaboradoresTitle.setText("Colaboradores de: " + currentInventario.getDescripcionInventario());
+        } else {
+            binding.textViewColaboradoresTitle.setText("Colaboradores");
+            binding.textViewColaboradoresError.setText("Error crítico: No se pudo obtener la información del inventario.");
+            binding.textViewColaboradoresError.setVisibility(View.VISIBLE);
+            ToastUtils.showErrorToast(getParentFragmentManager(), "No se pudo cargar la información del inventario."); // AQUI CAMBIO
+        }
 
         // Configurar RecyclerView
         colaboradorAdapter = new ColaboradorAdapter();
@@ -73,7 +80,17 @@ public class ColaboradoresDialogFragment extends DialogFragment {
         colaboradorAdapter.setOnColaboradorActionListener(new ColaboradorAdapter.OnColaboradorActionListener() {
             @Override
             public void onDeleteColaboradorClick(Colaborador colaborador) {
-                Toast.makeText(getContext(), "Eliminando usuario: " + colaborador.getUsername(), Toast.LENGTH_SHORT).show();
+                if (currentInventario != null) {
+                    //Integer currentUserId = inventarioListViewModel.currentUserId.getValue();
+                    Integer currentUserId = 1;
+                    if (currentUserId != null && currentUserId == 1) { //currentInventario.getIdUsuario()
+                        inventarioListViewModel.deleteColaborador(colaborador.getIdColaboradores(), currentInventario.getIdInventario());
+                    } else {
+                        ToastUtils.showWarningToast(getParentFragmentManager(), "Solo el propietario del inventario puede eliminar colaboradores.");
+                    }
+                } else {
+                    ToastUtils.showErrorToast(getParentFragmentManager(), "No se puede eliminar el colaborador. Información de inventario no disponible.");
+                }
             }
         });
 
@@ -84,8 +101,10 @@ public class ColaboradoresDialogFragment extends DialogFragment {
             if (colaboradores == null || colaboradores.isEmpty()) {
                 binding.textViewColaboradoresError.setText("No hay colaboradores para este inventario.");
                 binding.textViewColaboradoresError.setVisibility(View.VISIBLE);
+                binding.recyclerViewColaboradores.setVisibility(View.GONE);
             } else {
                 binding.textViewColaboradoresError.setVisibility(View.GONE);
+                binding.recyclerViewColaboradores.setVisibility(View.VISIBLE);
             }
         });
 
@@ -96,34 +115,74 @@ public class ColaboradoresDialogFragment extends DialogFragment {
             binding.textViewColaboradoresError.setVisibility(View.GONE); // Ocultar error mientras carga
         });
 
-        // Observar mensajes de error de colaboradores
+        // Observar mensajes de error de colaboradores y mostrarlos con el Toast personalizado
         inventarioListViewModel.colaboradoresErrorMessage.observe(getViewLifecycleOwner(), errorMessage -> {
             if (errorMessage != null && !errorMessage.isEmpty()) {
-                binding.textViewColaboradoresError.setText(errorMessage);
-                binding.textViewColaboradoresError.setVisibility(View.VISIBLE);
-                binding.recyclerViewColaboradores.setVisibility(View.GONE);
+                String userFriendlyMessage;
+                if (errorMessage.toLowerCase().contains("503") || errorMessage.toLowerCase().contains("not found")) {
+                    userFriendlyMessage = "Error: El recurso solicitado no fue encontrado. Intenta de nuevo más tarde.";
+                } else if (errorMessage.toLowerCase().contains("network") || errorMessage.toLowerCase().contains("failed to connect")) {
+                    userFriendlyMessage = "Error de conexión: No se pudo conectar al servidor. Revisa tu conexión a internet.";
+                } else if (errorMessage.toLowerCase().contains("404") || errorMessage.toLowerCase().contains("el usuario") && errorMessage.toLowerCase().contains("no existe")) {
+                    userFriendlyMessage = "No existe este usuario.";
+                }
+                else {
+                    userFriendlyMessage = "Ocurrió un error inesperado: " + errorMessage;
+                }
+
+                if (inventarioListViewModel.colaboradores.getValue() == null || inventarioListViewModel.colaboradores.getValue().isEmpty()) {
+                    binding.textViewColaboradoresError.setText(userFriendlyMessage);
+                    binding.textViewColaboradoresError.setVisibility(View.VISIBLE);
+                    binding.recyclerViewColaboradores.setVisibility(View.GONE);
+                } else {
+                    binding.textViewColaboradoresError.setVisibility(View.GONE);
+                }
+                ToastUtils.showErrorToast(getParentFragmentManager(), userFriendlyMessage);
+                inventarioListViewModel.clearColaboradoresErrorMessage();
             } else {
                 binding.textViewColaboradoresError.setVisibility(View.GONE);
+            }
+        });
+
+        inventarioListViewModel.userVerificationSuccess.observe(getViewLifecycleOwner(), isSuccess -> {
+            if (isSuccess != null && isSuccess) {
+                binding.editTextUsername.setText("");
+                binding.textInputLayoutUsername.setError(null);
+            }
+            inventarioListViewModel.clearUserVerificationSuccess();
+        });
+
+        // Observar mensajes de éxito del ViewModel
+        inventarioListViewModel.colaboradoresSuccessMessage.observe(getViewLifecycleOwner(), successMessage -> {
+            if (successMessage != null && !successMessage.isEmpty()) {
+                ToastUtils.showSuccessToast(getParentFragmentManager(), successMessage);
+                inventarioListViewModel.clearColaboradoresSuccessMessage();
+            }
+        });
+
+        inventarioListViewModel.infoMessage.observe(getViewLifecycleOwner(), infoMessage -> {
+            if (infoMessage != null && !infoMessage.isEmpty()) {
+                ToastUtils.showInfoToast(getParentFragmentManager(), infoMessage);
+                inventarioListViewModel.clearInfoMessage();
             }
         });
 
         // Lógica para el botón "Agregar Colaborador"
         binding.buttonAddCollab.setOnClickListener(v -> {
             String username = binding.editTextUsername.getText().toString().trim();
-            if (!username.isEmpty()) {
-                Toast.makeText(getContext(), "Intentando agregar el usuario: " + username, Toast.LENGTH_SHORT).show();
-                binding.editTextUsername.setText("");
+            if (!username.isEmpty() && currentInventario != null) {
+                inventarioListViewModel.addColaborador(currentInventario.getIdInventario(), username);
+            } else if (username.isEmpty()) {
+                binding.textInputLayoutUsername.setError("El campo 'usuario' no puede estar vacío.");
+                ToastUtils.showWarningToast(getParentFragmentManager(), "El campo 'usuario' no puede estar vacío.");
             } else {
-                binding.textInputLayoutUsername.setError("El username no puede estar vacío");
+                ToastUtils.showErrorToast(getParentFragmentManager(), "No se puede agregar el colaborador. Información de inventario no disponible.");
             }
         });
 
         // Cargar colaboradores al abrir el diálogo
         if (currentInventario != null) {
             inventarioListViewModel.loadColaboradores(currentInventario.getIdInventario());
-        } else {
-            binding.textViewColaboradoresError.setText("Error: No se pudo obtener el inventario.");
-            binding.textViewColaboradoresError.setVisibility(View.VISIBLE);
         }
     }
 

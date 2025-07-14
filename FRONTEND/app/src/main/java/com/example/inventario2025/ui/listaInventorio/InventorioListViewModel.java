@@ -9,6 +9,7 @@ import androidx.lifecycle.MediatorLiveData;
 
 import com.example.inventario2025.data.local.entities.Colaborador;
 import com.example.inventario2025.data.local.entities.Inventario;
+import com.example.inventario2025.data.local.entities.Usuario;
 import com.example.inventario2025.data.repository.InventarioRepository;
 import com.example.inventario2025.data.local.InventarioBaseDatos;
 import com.example.inventario2025.data.local.dao.InventarioDao;
@@ -30,7 +31,7 @@ public class InventorioListViewModel extends AndroidViewModel {
     private final LiveData<List<Inventario>> allCachedInventories;
     private final MutableLiveData<FilterType> currentFilterType = new MutableLiveData<>(FilterType.OWNED); // Inicia con "Creados por mí"
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>(""); // LiveData para la cadena de búsqueda
-    private final MutableLiveData<Boolean> _isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> _isLoading = new MutableLiveData<>(true);
     public LiveData<Boolean> isLoading = _isLoading;
 
     private final MutableLiveData<String> _errorMessage = new MutableLiveData<>();
@@ -45,6 +46,17 @@ public class InventorioListViewModel extends AndroidViewModel {
     public LiveData<Boolean> isColaboradoresLoading = _isColaboradoresLoading;
     private final MutableLiveData<String> _colaboradoresErrorMessage = new MutableLiveData<>();
     public LiveData<String> colaboradoresErrorMessage = _colaboradoresErrorMessage;
+
+    private final MutableLiveData<String> _colaboradoresSuccessMessage = new MutableLiveData<>();
+    public LiveData<String> colaboradoresSuccessMessage = _colaboradoresSuccessMessage;
+    private final MutableLiveData<Boolean> _userVerificationSuccess = new MutableLiveData<>();
+    public LiveData<Boolean> userVerificationSuccess = _userVerificationSuccess;
+    private final MutableLiveData<String> _infoMessage = new MutableLiveData<>();
+    public LiveData<String> infoMessage = _infoMessage;
+    private final MutableLiveData<Integer> _currentUserId = new MutableLiveData<>();
+    public LiveData<Integer> currentUserId = _currentUserId; //se usará para saber usuario actual
+    private final MutableLiveData<Boolean> _deleteInventarioSuccess = new MutableLiveData<>();
+    public LiveData<Boolean> getDeleteInventarioSuccess() { return _deleteInventarioSuccess; }
 
     public enum FilterType {
         OWNED,
@@ -89,6 +101,11 @@ public class InventorioListViewModel extends AndroidViewModel {
         });
 
         loadInventoriesForCurrentUser(1);
+    }
+
+    public void setCurrentUserId(int userId) {
+        _currentUserId.postValue(userId);
+        inventoryRepository.getInventoriesByUserId(userId);
     }
 
     private void applyFilterAndSort() {
@@ -155,16 +172,18 @@ public class InventorioListViewModel extends AndroidViewModel {
             Log.d(TAG, "applyFilterAndSort - Sin ordenamiento aplicado.");
         }
 
-        _isLoading.postValue(false); // Operación local, se asume rápida
-
-        // Manejo de mensajes de error y "no data"
-        if (tempFilteredList.isEmpty()) {
-            if (currentSearchQuery != null && !currentSearchQuery.trim().isEmpty()) {
-                _errorMessage.postValue("Oops... No se encontró inventario con este nombre en la lista '" + currentType.name() + "'.");
-                _noDataFound.postValue(true);
+        if (Boolean.FALSE.equals(_isLoading.getValue())) {
+            if (tempFilteredList.isEmpty()) {
+                if (currentSearchQuery != null && !currentSearchQuery.trim().isEmpty()) {
+                    _errorMessage.postValue("Oops... No se encontró inventario con este nombre en la lista '" + currentType.name() + "'.");
+                    _noDataFound.postValue(true);
+                } else {
+                    _errorMessage.postValue("No se encontraron inventarios para este tipo de filtro.");
+                    _noDataFound.postValue(true);
+                }
             } else {
-                _errorMessage.postValue("No se encontraron inventarios para este tipo de filtro.");
-                _noDataFound.postValue(true);
+                _errorMessage.postValue(null);
+                _noDataFound.postValue(false);
             }
         } else {
             _errorMessage.postValue(null);
@@ -187,7 +206,7 @@ public class InventorioListViewModel extends AndroidViewModel {
     }
 
     public void setSearchQuery(String query) {
-       String newQuery = query != null ? query : "";
+        String newQuery = query != null ? query : "";
         if (!newQuery.equals(searchQuery.getValue())) {
             searchQuery.setValue(newQuery);
             Log.d(TAG, "setSearchQuery - LiveData searchQuery actualizado a: '" + newQuery + "'");
@@ -219,8 +238,9 @@ public class InventorioListViewModel extends AndroidViewModel {
         return _noDataFound;
     }
 
-    private void loadInventoriesForCurrentUser(int userId) {
-        _isLoading.setValue(true);
+    public void loadInventoriesForCurrentUser(int userId) {
+        _isLoading.postValue(true);
+        _errorMessage.postValue(null);
         inventoryRepository.getInventoriesByUserId(userId, new InventarioRepository.OnOperationCompleteListener() {
             @Override
             public void onSuccess() {
@@ -241,6 +261,7 @@ public class InventorioListViewModel extends AndroidViewModel {
 
     public void createNewInventario(String description, int userId) {
         _isLoading.postValue(true);
+        _errorMessage.postValue(null);
         inventoryRepository.createInventarioOWNR(description, userId, new InventarioRepository.OnOperationCompleteListener() {
             @Override
             public void onSuccess() {
@@ -264,9 +285,9 @@ public class InventorioListViewModel extends AndroidViewModel {
         inventoryRepository.updateInventario(inventarioId, newDescription, new InventarioRepository.OnOperationCompleteListener() {
             @Override
             public void onSuccess() {
+                loadInventoriesForCurrentUser(1);
                 _isLoading.postValue(false);
                 _errorMessage.postValue(null);
-                loadInventoriesForCurrentUser(1); // Después de una actualización exitosa, recargar la lista para reflejar los cambios
                 Log.d(TAG, "Inventario " + inventarioId + " actualizado exitosamente. Refrescando lista.");
             }
 
@@ -300,5 +321,133 @@ public class InventorioListViewModel extends AndroidViewModel {
                 Log.e(TAG, "Fallo al cargar colaboradores para inventario " + inventarioId + ": " + message);
             }
         });
+    }
+
+    public void addColaborador(int inventarioId, String username) {
+        _isColaboradoresLoading.postValue(true);
+        _colaboradoresErrorMessage.postValue(null);
+        _colaboradoresSuccessMessage.postValue(null);
+        _userVerificationSuccess.postValue(null);
+        _infoMessage.postValue("Intentando agregar el usuario: " + username + "...");
+        inventoryRepository.checkUserExists(username, new InventarioRepository.OnUserCheckListener() {
+            @Override
+            public void onUserChecked(Usuario usuario) {
+                if (usuario.isValid() && usuario.getIdUsuario() != null) {
+                    Log.d(TAG, "Usuario '" + username + "' existe con ID: " + usuario.getIdUsuario());
+                    _userVerificationSuccess.postValue(true);
+
+                    inventoryRepository.addColaborador(inventarioId, usuario.getIdUsuario(), "COLAB", new InventarioRepository.OnOperationCompleteListener() {
+                        @Override
+                        public void onSuccess() {
+                            _isColaboradoresLoading.postValue(false);
+                            loadColaboradores(inventarioId);
+                            _colaboradoresSuccessMessage.postValue("Usuario '" + username + "' agregado correctamente."); // CAMBIO AQUI: Mensaje de éxito
+                            Log.d(TAG, "Colaborador agregado exitosamente.");
+                            _infoMessage.postValue(null);
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            _isColaboradoresLoading.postValue(false);
+                            _colaboradoresErrorMessage.postValue("Error al agregar colaborador: " + message);
+                            Log.e(TAG, "Error al agregar colaborador: " + message);
+                            _infoMessage.postValue(null);
+                        }
+                    });
+                } else {
+                    _isColaboradoresLoading.postValue(false);
+                    _colaboradoresErrorMessage.postValue("El usuario '" + username + "' no existe.");
+                    Log.d(TAG, "El usuario '" + username + "' no existe.");
+                    _userVerificationSuccess.postValue(false);
+                    _infoMessage.postValue(null);
+                }
+            }
+
+            @Override
+            public void onUserCheckFailed(String message) {
+                _isColaboradoresLoading.postValue(false);
+                _colaboradoresErrorMessage.postValue("Fallo al verificar usuario: " + message);
+                Log.e(TAG, "Fallo al verificar usuario: " + message);
+                _userVerificationSuccess.postValue(false);
+                _infoMessage.postValue(null);
+            }
+        });
+    }
+
+    public void deleteColaborador(int idColaborador, int inventarioId) {
+        _isColaboradoresLoading.postValue(true);
+        _colaboradoresErrorMessage.postValue(null);
+        _colaboradoresSuccessMessage.postValue(null);
+        _infoMessage.postValue("Eliminando colaborador...");
+
+        inventoryRepository.deleteColaborador(idColaborador, new InventarioRepository.OnOperationCompleteListener() {
+            @Override
+            public void onSuccess() {
+                _isColaboradoresLoading.postValue(false);
+                loadColaboradores(inventarioId);
+                _colaboradoresSuccessMessage.postValue("Colaborador eliminado correctamente.");
+                Log.d(TAG, "Colaborador eliminado exitosamente.");
+                _infoMessage.postValue(null);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                _isColaboradoresLoading.postValue(false);
+                _colaboradoresErrorMessage.postValue("Error al eliminar colaborador: " + message);
+                Log.e(TAG, "Error al eliminar colaborador: " + message);
+                _infoMessage.postValue(null);
+            }
+        });
+    }
+
+    public void deleteInventario(int inventarioId, int userId) { // CAMBIO AQUI: Añadir userId para recargar
+        _isLoading.postValue(true);
+        _errorMessage.postValue(null);
+        _deleteInventarioSuccess.postValue(null);
+        _infoMessage.postValue("Eliminando inventario...");
+
+        inventoryRepository.deleteInventario(inventarioId, new InventarioRepository.OnOperationCompleteListener() {
+            @Override
+            public void onSuccess() {
+                _isLoading.postValue(false);
+                _deleteInventarioSuccess.postValue(true);
+                loadInventoriesForCurrentUser(userId);
+                _infoMessage.postValue(null);
+                Log.d(TAG, "Inventario " + inventarioId + " eliminado exitosamente.");
+            }
+
+            @Override
+            public void onFailure(String message) {
+                _isLoading.postValue(false);
+                _errorMessage.postValue(message);
+                _deleteInventarioSuccess.postValue(false);
+                _infoMessage.postValue(null);
+                Log.e(TAG, "Fallo al eliminar inventario " + inventarioId + ": " + message);
+            }
+        });
+    }
+
+    public void clearUserVerificationSuccess() {
+        _userVerificationSuccess.postValue(null);
+    }
+
+    public void clearInfoMessage() {
+        _infoMessage.postValue(null);
+    }
+
+    public void clearColaboradoresErrorMessage() {
+        _colaboradoresErrorMessage.postValue(null);
+    }
+
+    public void clearColaboradoresSuccessMessage() {
+        _colaboradoresSuccessMessage.postValue(null);
+    }
+
+    public void clearDeleteInventarioSuccess() {
+        _deleteInventarioSuccess.postValue(null);
+    }
+
+    public void clearErrorMessage() {
+        _errorMessage.postValue(null);
     }
 }

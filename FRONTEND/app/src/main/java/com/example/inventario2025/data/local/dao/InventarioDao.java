@@ -41,4 +41,7 @@ public interface InventarioDao {
 
     @Query("DELETE FROM inventario")
     void deleteAll();
+
+    @Query("SELECT * FROM inventario WHERE idInventario = :id")
+    Inventario getInventarioByIdSync(int id);
 }

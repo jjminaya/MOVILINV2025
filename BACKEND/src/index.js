@@ -7,6 +7,8 @@ const elementoController = require('./controllers/elementoController');
 const inventarioController = require('./controllers/inventarioController');
 const usuarioController = require('./controllers/usuarioController');
 const colaboradorController = require('./controllers/colaboradorController');
+const personaController = require('./controllers/personaController');
+const catalogoController = require('./controllers/catalogoController');
 
 const app = express();
 
@@ -29,9 +31,14 @@ app.post('/api/login', usuarioController.login);
 app.use('/api/elementos', elementoController);
 app.use('/api/inventarios', inventarioController);
 app.use('/api/colaboradores', colaboradorController);
+app.use('/api/personas', personaController);
+app.use('/api/catalogos', catalogoController);
 
 // ✅ Escuchar en todas las interfaces (0.0.0.0)
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🟢 Servidor corriendo en http://0.0.0.0:${PORT}`);
+
+console.log(`🟢 Servidor corriendo en http://0.0.0.0:${PORT}`);
+
 });
