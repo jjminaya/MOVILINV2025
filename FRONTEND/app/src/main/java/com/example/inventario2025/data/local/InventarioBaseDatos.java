@@ -5,16 +5,19 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.example.inventario2025.data.local.dao.ElementoDao;
 import com.example.inventario2025.data.local.dao.InventarioDao;
+import com.example.inventario2025.data.local.entities.Elemento;
 import com.example.inventario2025.data.local.entities.Inventario;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {Inventario.class}, version = 5, exportSchema = false)
+@Database(entities = {Inventario.class, Elemento.class}, version = 6, exportSchema = false)
 public abstract class InventarioBaseDatos extends RoomDatabase {
 
     public abstract InventarioDao inventoryDao();
+    public abstract ElementoDao elementoDao();
 
     private static volatile InventarioBaseDatos INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;
