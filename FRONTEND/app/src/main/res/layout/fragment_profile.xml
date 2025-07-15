@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutPerfil"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="#FAFAFA">
+
+    <TextView
+        android:id="@+id/tvUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Usuario: admin"
+        android:textSize="18sp"
+        android:padding="8dp" />
+
+    <TextView
+        android:id="@+id/tvTipoUsuario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tipo: admin"
+        android:textSize="16sp"
+        android:padding="8dp" />
+
+    <Button
+        android:id="@+id/btnEditarPerfil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="✏️ Editar Perfil"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#1976D2"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btnCerrarSesion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🚪 Cerrar Sesión"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#D32F2F"
+        android:textColor="#FFFFFF" />
+</LinearLayout>
+
