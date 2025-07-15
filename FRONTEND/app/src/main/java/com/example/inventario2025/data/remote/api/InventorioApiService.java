@@ -1,6 +1,7 @@
 package com.example.inventario2025.data.remote.api;
 
 import com.example.inventario2025.data.local.entities.Colaborador;
+import com.example.inventario2025.data.local.entities.Elemento;
 import com.example.inventario2025.data.local.entities.Usuario;
 import com.example.inventario2025.data.remote.models.InventarioRequest;
 import com.example.inventario2025.data.remote.models.InventarioResponse;
@@ -62,4 +63,25 @@ public interface InventorioApiService {
     // Endpoint para eliminar un colaborador
     @DELETE("colaboradores/{id}")
     Call<Void> deleteColaborador(@Path("id") int idColaborador);
+
+    // ----------------------------- ENDPOINTS ELEMENTOS -------------------------------------------
+    // Obtiene todos los elementos de un inventario específico
+    @GET("elementos/inventario/{inventarioID}")
+    Call<List<Elemento>> getElementosByInventarioId(@Path("inventarioID") int inventarioId);
+
+    // Obtiene la data de un elemento por su ID
+    @GET("elementos/{id}")
+    Call<Elemento> getElementoById(@Path("id") int idElemento);
+
+    // Crea un nuevo elemento
+    @POST("elementos")
+    Call<Elemento> createElemento(@Body Elemento elemento);
+
+    // Modifica la data de un elemento existente
+    @PUT("elementos/{id}")
+    Call<Void> updateElemento(@Path("id") int idElemento, @Body Elemento elemento);
+
+    // Elimina un elemento por su ID
+    @DELETE("elementos/{id}")
+    Call<Void> deleteElemento(@Path("id") int idElemento);
 }
