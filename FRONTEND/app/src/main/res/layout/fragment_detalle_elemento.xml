@@ -1,71 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#F2F2F2"
         android:padding="16dp">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            card_view:cardCornerRadius="16dp"
+            card_view:cardElevation="6dp"
+            android:background="@android:color/white"
+            android:padding="20dp">
 
-            <TextView
-                android:id="@+id/tvTitulo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Detalle del Elemento"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp" />
-
-            <TextView android:id="@+id/tvCodigo"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Código único: "
-                android:textSize="18sp" />
+                android:orientation="vertical">
 
-            <TextView android:id="@+id/tvDescripcion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Descripción: "
-                android:textSize="18sp" />
+                <!-- Título -->
+                <TextView
+                    android:id="@+id/tvTitulo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" Detalle del Elemento"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:gravity="center"
+                    android:layout_marginBottom="24dp" />
 
-            <TextView android:id="@+id/tvMarca"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Marca: "
-                android:textSize="18sp" />
+                <!-- Cada atributo en fila con ícono -->
+                <LinearLayout
+                    style="@style/DetalleFila"
+                    tools:ignore="UseCompoundDrawables">
+                    <ImageView
+                        style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_info_details" />
+                    <TextView
+                        android:id="@+id/tvCodigo"
+                        style="@style/DetalleTexto"
+                        android:text="Código único:" />
+                </LinearLayout>
 
-            <TextView android:id="@+id/tvModelo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Modelo: "
-                android:textSize="18sp" />
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_edit" />
+                    <TextView
+                        android:id="@+id/tvDescripcion"
+                        style="@style/DetalleTexto"
+                        android:text="Descripción:" />
+                </LinearLayout>
 
-            <TextView android:id="@+id/tvColor"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Color: "
-                android:textSize="18sp" />
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_agenda" />
+                    <TextView
+                        android:id="@+id/tvMarca"
+                        style="@style/DetalleTexto"
+                        android:text="Marca:" />
+                </LinearLayout>
 
-            <TextView android:id="@+id/tvEstadoFisico"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Estado físico: "
-                android:textSize="18sp" />
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_compass" />
+                    <TextView
+                        android:id="@+id/tvModelo"
+                        style="@style/DetalleTexto"
+                        android:text="Modelo:" />
+                </LinearLayout>
 
-            <TextView android:id="@+id/tvEstadoSistema"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Estado en sistema: "
-                android:textSize="18sp" />
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_gallery" />
+                    <TextView
+                        android:id="@+id/tvColor"
+                        style="@style/DetalleTexto"
+                        android:text="Color:" />
+                </LinearLayout>
 
-        </LinearLayout>
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_view" />
+                    <TextView
+                        android:id="@+id/tvEstadoFisico"
+                        style="@style/DetalleTexto"
+                        android:text="Estado físico:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_lock_idle_lock" />
+                    <TextView
+                        android:id="@+id/tvEstadoSistema"
+                        style="@style/DetalleTexto"
+                        android:text="Estado en sistema:" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
     </ScrollView>
 </layout>
+
 

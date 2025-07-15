@@ -2,6 +2,7 @@ package com.example.inventario2025.data.local.entities;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
@@ -46,8 +47,9 @@ public class Elemento implements Serializable {
     @SerializedName("estado")
     private int estado;
 
-    public Elemento() {}
+    public Elemento() {} // Este es el constructor que Room usará
 
+    @Ignore
     public Elemento(int idElemento, int idInventario, String descripcionElemento, int cantidad, int estado) {
         this.idElemento = idElemento;
         this.idInventario = idInventario;
@@ -60,6 +62,7 @@ public class Elemento implements Serializable {
         this.estadoElemento = null;
     }
 
+    @Ignore
     public Elemento(int idElemento, String uniCodeElemento, String descripcionElemento,
                     String marcaElemento, String modeloElemento, String colorElemento,
                     String estadoElemento, int idInventario, int cantidad, int estado) {
@@ -72,6 +75,7 @@ public class Elemento implements Serializable {
         this.estadoElemento = estadoElemento;
         this.idInventario = idInventario;
         this.estado = estado;
+
     }
 
     public int getIdElemento() {
