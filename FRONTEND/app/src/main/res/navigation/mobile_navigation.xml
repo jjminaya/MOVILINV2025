@@ -30,6 +30,18 @@
     </fragment>
 
     <fragment
+        android:id="@+id/detalleElementoFragment"
+        android:name="com.example.inventario2025.ui.listaElementos.DetalleElementoFragment"
+        android:label="Detalle del Elemento"
+        tools:layout="@layout/fragment_detalle_elemento">
+
+        <argument
+            android:name="elemento"
+            app:argType="com.example.inventario2025.data.local.entities.Elemento"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
         android:id="@+id/cameraScannerFragment"
         android:name="com.example.inventario2025.ui.listaElementos.CameraScannerFragment"
         android:label="Escanear Código"

@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.text.Editable;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.inventario2025.ui.dialogos.ConfirmationDialogFragment;
 import com.example.inventario2025.ui.dialogos.CrearElementoDialogFragment;
+import com.example.inventario2025.ui.dialogos.EditarElementoDialogFragment;
 import com.example.inventario2025.utils.ToastUtils;
 
 import com.example.inventario2025.R;
@@ -191,14 +194,29 @@ public class ElementosListFragment extends Fragment implements
         });
     }
 
+
+
     @Override
     public void onItemClick(Elemento elemento) {
-        ToastUtils.showInfoToast(getParentFragmentManager(), "Elemento clicado: " + elemento.getDescripcionElemento());
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("elemento", elemento);
+
+        NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.detalleElementoFragment, bundle);
     }
+
 
     @Override
     public void onEditElementClick(Elemento elemento) {
         //AQUI ENTRA JESUS
+
+        EditarElementoDialogFragment dialog = EditarElementoDialogFragment.newInstance(elemento);
+        dialog.setOnElementoUpdatedListener(elementoActualizado -> {
+            elementosListViewModel.updateElemento(elementoActualizado);
+            ToastUtils.showSuccessToast(getParentFragmentManager(), "Elemento actualizado.");
+        });
+        dialog.show(getParentFragmentManager(), "EditarElementoDialogFragment");
+
         ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo vista de editar: " + elemento.getDescripcionElemento());
     }
 
