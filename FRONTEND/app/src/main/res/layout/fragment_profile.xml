@@ -1,45 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layoutPerfil"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
     android:background="#FAFAFA">
 
-    <TextView
-        android:id="@+id/tvUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Usuario: admin"
-        android:textSize="18sp"
-        android:padding="8dp" />
-
-    <TextView
-        android:id="@+id/tvTipoUsuario"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tipo: admin"
-        android:textSize="16sp"
-        android:padding="8dp" />
-
-    <Button
-        android:id="@+id/btnEditarPerfil"
+    <LinearLayout
+        android:id="@+id/layoutPerfil"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="✏️ Editar Perfil"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#1976D2"
-        android:textColor="#FFFFFF" />
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
-    <Button
-        android:id="@+id/btnCerrarSesion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="🚪 Cerrar Sesión"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF" />
-</LinearLayout>
+        <!-- Tarjeta con datos del usuario -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="@drawable/bg_card"
+            android:elevation="4dp"
+            android:layout_marginBottom="32dp">
 
+            <TextView
+                android:id="@+id/tvUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Usuario: jhonatan"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="#333"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/tvTipoUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tipo: DEV"
+                android:textSize="16sp"
+                android:textColor="#666"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Botón Editar -->
+        <Button
+            android:id="@+id/btnEditarPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="✏️ Editar Perfil"
+            android:textAllCaps="false"
+            android:backgroundTint="#1976D2"
+            android:textColor="#FFFFFF"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_button_blue" />
+
+        <!-- Botón Cerrar Sesión -->
+        <Button
+            android:id="@+id/btnCerrarSesion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔒 Cerrar Sesión"
+            android:textAllCaps="false"
+            android:backgroundTint="#D32F2F"
+            android:textColor="#FFFFFF"
+            android:padding="12dp"
+            android:background="@drawable/bg_button_red" />
+    </LinearLayout>
+</ScrollView>
