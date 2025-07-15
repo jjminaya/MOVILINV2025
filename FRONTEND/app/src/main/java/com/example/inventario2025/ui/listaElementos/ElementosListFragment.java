@@ -26,6 +26,7 @@ import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.data.local.entities.Elemento;
 import com.example.inventario2025.databinding.FragmentElementosListBinding;
 import com.example.inventario2025.ui.adapters.ElementosAdapter;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,12 +149,20 @@ public class ElementosListFragment extends Fragment implements
             if (cameraDrawable != null && event.getAction() == MotionEvent.ACTION_UP) {
                 int clickableAreaWidth = (int) (48 * getResources().getDisplayMetrics().density);
                 int clickableLeftBound = binding.searchElementsEditText.getRight() - clickableAreaWidth;
+
                 if (event.getRawX() >= clickableLeftBound) {
-                    ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo cámara para escanear...");
+                    NavHostFragment.findNavController(this).navigate(R.id.action_elementosListFragment_to_cameraScannerFragment);
                     return true;
                 }
             }
             return false;
+        });
+
+        getParentFragmentManager().setFragmentResultListener("barcode_scan_request", this, (requestKey, bundle) -> {
+            String barcode = bundle.getString("barcode_result");
+            if (barcode != null) {
+                binding.searchElementsEditText.setText(barcode);
+            }
         });
 
         binding.btnAddElement.setOnClickListener(v -> {
@@ -184,7 +193,6 @@ public class ElementosListFragment extends Fragment implements
 
     @Override
     public void onItemClick(Elemento elemento) {
-        //AQUI ENTRA JESUS
         ToastUtils.showInfoToast(getParentFragmentManager(), "Elemento clicado: " + elemento.getDescripcionElemento());
     }
 

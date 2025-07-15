@@ -24,7 +24,16 @@
             android:name="inventario"
             app:argType="com.example.inventario2025.data.local.entities.Inventario"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_elementosListFragment_to_cameraScannerFragment"
+            app:destination="@id/cameraScannerFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/cameraScannerFragment"
+        android:name="com.example.inventario2025.ui.listaElementos.CameraScannerFragment"
+        android:label="Escanear Código"
+        tools:layout="@layout/fragment_camera_scanner" />
 
     <!--    <fragment-->
     <!--        android:id="@+id/navigation_profile"-->
