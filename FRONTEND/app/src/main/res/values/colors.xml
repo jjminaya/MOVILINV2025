@@ -45,4 +45,7 @@
     <color name="login_button">#6200EE</color>
     <color name="login_button_text">#FFFFFF</color>
 
+    <color name="primary">#6200EE</color>
+    <color name="gray_dark">#333333</color>
+
 </resources>
