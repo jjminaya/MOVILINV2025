@@ -24,5 +24,9 @@ class ColaboradorService{
     verificarUsuarioValido(username) {
         return colaboradorRepository.verificarUsuarioValido(username);
     }
+
+    getAllActiveUsers(){
+        return colaboradorRepository.getAllActiveUsers();
+    }
 }
 module.exports = new ColaboradorService();

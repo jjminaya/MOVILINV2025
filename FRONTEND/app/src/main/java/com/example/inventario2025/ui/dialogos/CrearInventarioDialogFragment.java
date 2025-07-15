@@ -55,7 +55,7 @@ public class CrearInventarioDialogFragment extends DialogFragment {
         binding.buttonAction.setOnClickListener(v -> {
             String description = binding.editTextDescription.getText().toString().trim();
             if (!description.isEmpty()) {
-                viewModel.createNewInventario(description, 1);
+                viewModel.createNewInventario(description);
                 dismiss();
             } else {
                 binding.textInputLayoutDescription.setError("La descripción no puede estar vacía");
