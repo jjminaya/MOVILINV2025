@@ -48,5 +48,6 @@ class CrudRepository {
         return result.affectedRows > 0;
     }
 }
+console.log('crudRepository listo ✅');
 
 module.exports = CrudRepository;
