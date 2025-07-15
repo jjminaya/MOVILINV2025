@@ -87,7 +87,11 @@ public class InventorioListFragment extends Fragment implements ConfirmationDial
 
             @Override
             public void onDeleteClick(Inventario inventario) {
-                showDeleteConfirmationDialog(inventario.getIdInventario(), inventario.getDescripcionInventario());
+                if ("OWNR".equalsIgnoreCase(inventario.getRangoColaborador())) {
+                    showDeleteConfirmationDialog(inventario.getIdInventario(), inventario.getDescripcionInventario());
+                } else {
+                    ToastUtils.showWarningToast(getParentFragmentManager(), "Solo el propietario puede eliminar este inventario.");
+                }
             }
 
             @Override

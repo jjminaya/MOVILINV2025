@@ -56,6 +56,9 @@ public interface InventorioApiService {
     @GET("colaboradores/user/{username}")
     Call<Usuario> checkUserExists(@Path("username") String username);
 
+    @GET("colaboradores/user/active/all")
+    Call<List<Usuario>> getAllActiveUsers();
+
     // Endpoint para crear un colaborador
     @POST("colaboradores")
     Call<Void> addColaborador(@Body Map<String, Object> body);

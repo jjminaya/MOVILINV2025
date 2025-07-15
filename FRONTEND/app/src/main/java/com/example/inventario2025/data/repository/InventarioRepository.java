@@ -390,6 +390,24 @@ public class InventarioRepository {
         });
     }
 
+    public void getAllActiveUsers(OnAllUsersLoadedListener listener) {
+        inventoryApiService.getAllActiveUsers().enqueue(new Callback<List<Usuario>>() {
+            @Override
+            public void onResponse(Call<List<Usuario>> call, Response<List<Usuario>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onAllUsersLoaded(response.body());
+                } else {
+                    listener.onAllUsersLoadFailed("Error al cargar usuarios: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Usuario>> call, Throwable t) {
+                listener.onAllUsersLoadFailed("Fallo de red al cargar usuarios: " + t.getMessage());
+            }
+        });
+    }
+
     public interface OnColaboradoresLoadedListener {
         void onColaboradoresLoaded(List<Colaborador> colaboradores);
         void onColaboradoresLoadFailed(String message);
@@ -403,5 +421,10 @@ public class InventarioRepository {
     public interface OnUserCheckListener {
         void onUserChecked(Usuario usuario);
         void onUserCheckFailed(String message);
+    }
+
+    public interface OnAllUsersLoadedListener {
+        void onAllUsersLoaded(List<Usuario> usuarios);
+        void onAllUsersLoadFailed(String message);
     }
 }

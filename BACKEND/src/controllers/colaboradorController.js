@@ -47,6 +47,19 @@ router.get('/user/:username', async (req, res) => {
     }
 });
 
+router.get('/user/active/all', async (req, res) => {
+    try {
+        const ActiveUsers = await colaboradorService.getAllActiveUsers();
+        if (ActiveUsers) {
+            res.status(200).json(ActiveUsers);
+        } else {
+            res.status(404).json({ message: 'Usuarios no encontrados' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Hubo un error al obtener los usuarios', error: error.message });
+    }
+});
+
 router.post('/', async (req, res) => {
     try {
         const newColaborador = await colaboradorService.createColaborador(req.body);
