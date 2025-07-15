@@ -38,6 +38,12 @@ android {
 
 dependencies {
 
+    // Dependencias de Prueba
+    testImplementation(libs.junit)
+
+    // Dependencias de Android Test (se ejecutan en un dispositivo/emulador)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -58,18 +64,15 @@ dependencies {
     // RecyclerView
     implementation(libs.recyclerview)
 
-
-
     // LiveData & ViewModel
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
 
+    // ML Kit & CameraX
+    implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
 
-
-    // Si el conflicto de lifecycle-common persiste, puedes forzarlo aquí
-    // implementation(libs.lifecycle.common) // Descomenta si necesitas forzar la versión
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
 }
