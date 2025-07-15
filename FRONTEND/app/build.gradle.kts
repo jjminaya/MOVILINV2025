@@ -26,7 +26,6 @@ android {
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -34,22 +33,28 @@ android {
 
     buildFeatures {
         viewBinding = true
-        dataBinding = true
     }
 }
 
 dependencies {
+
+    // Dependencias de Prueba
+    testImplementation(libs.junit)
+
+    // Dependencias de Android Test (se ejecutan en un dispositivo/emulador)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    implementation("androidx.cardview:cardview:1.0.0")
 
     // Room
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler) // ✅ CORRECTO
+    add("annotationProcessor", libs.room.compiler)
 
     // Retrofit & Gson
     implementation(libs.retrofit.core)
@@ -63,7 +68,11 @@ dependencies {
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    // ML Kit & CameraX
+    implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+
 }
