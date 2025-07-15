@@ -237,12 +237,15 @@ public class ElementosListViewModel extends AndroidViewModel {
             return;
         }
 
-        String lowerCaseQuery = query.toLowerCase();
+        String lowerCaseQuery = query.toLowerCase().trim();
         List<Elemento> filteredList = originalList.stream()
-                .filter(elemento -> elemento.getDescripcionElemento().toLowerCase().contains(lowerCaseQuery) ||
-                        String.valueOf(elemento.getIdElemento()).contains(lowerCaseQuery))
+                .filter(elemento ->
+                        // Busca en la descripción
+                        (elemento.getDescripcionElemento() != null && elemento.getDescripcionElemento().toLowerCase().contains(lowerCaseQuery)) ||
+                                // Busca en el uniCode
+                                (elemento.getUniCodeElemento() != null && elemento.getUniCodeElemento().toLowerCase().contains(lowerCaseQuery))
+                )
                 .collect(Collectors.toList());
         _filteredElements.postValue(filteredList);
     }
 }
-
