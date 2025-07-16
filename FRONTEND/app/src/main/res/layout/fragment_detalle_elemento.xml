@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F2F2F2"
+        android:padding="16dp">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card_view:cardCornerRadius="16dp"
+            card_view:cardElevation="6dp"
+            android:background="@android:color/white"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Título -->
+                <TextView
+                    android:id="@+id/tvTitulo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" Detalle del Elemento"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:gravity="center"
+                    android:layout_marginBottom="24dp" />
+
+                <!-- Cada atributo en fila con ícono -->
+                <LinearLayout
+                    style="@style/DetalleFila"
+                    tools:ignore="UseCompoundDrawables">
+                    <ImageView
+                        style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_info_details" />
+                    <TextView
+                        android:id="@+id/tvCodigo"
+                        style="@style/DetalleTexto"
+                        android:text="Código único:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_edit" />
+                    <TextView
+                        android:id="@+id/tvDescripcion"
+                        style="@style/DetalleTexto"
+                        android:text="Descripción:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_agenda" />
+                    <TextView
+                        android:id="@+id/tvMarca"
+                        style="@style/DetalleTexto"
+                        android:text="Marca:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_compass" />
+                    <TextView
+                        android:id="@+id/tvModelo"
+                        style="@style/DetalleTexto"
+                        android:text="Modelo:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_gallery" />
+                    <TextView
+                        android:id="@+id/tvColor"
+                        style="@style/DetalleTexto"
+                        android:text="Color:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_menu_view" />
+                    <TextView
+                        android:id="@+id/tvEstadoFisico"
+                        style="@style/DetalleTexto"
+                        android:text="Estado físico:" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetalleFila">
+                    <ImageView style="@style/DetalleIcono"
+                        android:src="@android:drawable/ic_lock_idle_lock" />
+                    <TextView
+                        android:id="@+id/tvEstadoSistema"
+                        style="@style/DetalleTexto"
+                        android:text="Estado en sistema:" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </ScrollView>
+</layout>
+
+
