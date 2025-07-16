@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.inventario2025.R;
+
 import java.util.List;
 
 public class ReporteAdapter extends RecyclerView.Adapter<ReporteAdapter.ViewHolder>{
@@ -30,7 +32,7 @@ public class ReporteAdapter extends RecyclerView.Adapter<ReporteAdapter.ViewHold
 
     @Override
     public ReporteAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_Reporte_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_reporte_card, parent, false);
         return new ViewHolder(view);
     }
 
