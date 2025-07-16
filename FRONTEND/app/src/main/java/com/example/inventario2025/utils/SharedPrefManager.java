@@ -2,12 +2,11 @@ package com.example.inventario2025.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-// CAMBIOS AQUI: Se importa el modelo de datos correcto
+import android.util.Log;
 import com.example.inventario2025.data.local.entities.Usuario;
 
-
 public class SharedPrefManager {
+
     private static final String SHARED_PREF_NAME = "user_session";
     private static final String KEY_ID = "idUsuario";
     private static final String KEY_USERNAME = "username";
@@ -45,18 +44,13 @@ public class SharedPrefManager {
         return usuario;
     }
 
-    public int obtenerIdUsuario() {
-        return sharedPreferences.getInt(KEY_ID, -1); // Devuelve -1 si no se encuentra
+    public boolean estaLogueado() {
+        return sharedPreferences.contains(KEY_ID)
+                && sharedPreferences.getString(KEY_USERNAME, null) != null;
     }
 
     public void cerrarSesion() {
         editor.clear();
         editor.apply();
-    }
-
-    public boolean estaLogueado() {
-        return sharedPreferences.contains(KEY_ID)
-                && sharedPreferences.getInt(KEY_ID, -1) != -1
-                && sharedPreferences.getString(KEY_USERNAME, null) != null;
     }
 }

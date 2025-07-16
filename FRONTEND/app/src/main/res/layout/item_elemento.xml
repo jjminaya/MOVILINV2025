@@ -7,20 +7,19 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp" >
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/element_id_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:contentDescription="Identificador de elemento"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
@@ -32,16 +31,15 @@
             android:id="@+id/element_description_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/button_toggle_element_actions"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/element_id_text_view"
-            tools:text="Descripción del Elemento: Teclado mecánico RGB" />
+            tools:text="Descripción del Elemento: Teclado mecánico RGB con un texto largo para demostración" />
 
         <ImageButton
             android:id="@+id/button_toggle_element_actions"
@@ -55,8 +53,6 @@
             app:tint="?attr/colorOnSurface"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             tools:ignore="ImageContrastCheck" />
 
         <LinearLayout
@@ -66,7 +62,6 @@
             android:orientation="horizontal"
             android:gravity="end"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -81,7 +76,7 @@
                 android:src="@drawable/print_24px"
                 android:scaleType="fitCenter"
                 android:padding="8dp"
-                app:tint="@color/purple_500"
+                app:tint="@color/dark_gray"
                 tools:ignore="ImageContrastCheck" />
 
             <View
