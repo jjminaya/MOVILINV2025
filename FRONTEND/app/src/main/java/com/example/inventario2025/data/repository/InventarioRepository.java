@@ -408,6 +408,38 @@ public class InventarioRepository {
         });
     }
 
+    public void updateInventarioElementoCount(int inventarioId, int nuevoConteo, OnOperationCompleteListener listener) {
+        Map<String, String> body = new HashMap<>();
+        body.put("elementosInventario", String.valueOf(nuevoConteo));
+
+        inventoryApiService.updateInventario(inventarioId, body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    IO_EXECUTOR.execute(() -> {
+                        Inventario inventario = inventoryDao.getInventarioByIdSync(inventarioId);
+                        if (inventario != null) {
+                            inventario.setElementosInventario(nuevoConteo);
+                            inventoryDao.update(inventario);
+                        }
+                    });
+                    if (listener != null) listener.onSuccess();
+                    Log.d(TAG, "Conteo de elementos actualizado en API para inventario " + inventarioId);
+                } else {
+                    String errorMsg = "Error al actualizar conteo: " + response.code();
+                    if (listener != null) listener.onFailure(errorMsg);
+                    Log.e(TAG, errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (listener != null) listener.onFailure("Fallo de red al actualizar conteo: " + t.getMessage());
+                Log.e(TAG, "Fallo de red al actualizar conteo", t);
+            }
+        });
+    }
+
     public interface OnColaboradoresLoadedListener {
         void onColaboradoresLoaded(List<Colaborador> colaboradores);
         void onColaboradoresLoadFailed(String message);
