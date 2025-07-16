@@ -28,6 +28,8 @@ import android.os.Environment;
 
 import androidx.core.content.FileProvider;
 
+import com.example.inventario2025.utils.EtiquetaUtils;
+import com.example.inventario2025.utils.FileShareUtils;
 import com.example.inventario2025.utils.PdfUtils;
 
 import java.io.File;
@@ -285,7 +287,7 @@ public class ElementosListFragment extends Fragment implements
             Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_SHORT).show();
         }
     }
-          
+
     @Override
     public void onItemClick(Elemento elemento) {
         DetalleElementoDialogFragment dialogFragment = DetalleElementoDialogFragment.newInstance(elemento);
@@ -309,8 +311,21 @@ public class ElementosListFragment extends Fragment implements
 
     @Override
     public void onPrintCodeClick(Elemento elemento) {
-                    generarYCompartirPDF(requireContext(), elemento);
-                ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo vista de impresion: " + elemento.getDescripcionElemento());
+        ToastUtils.showInfoToast(getParentFragmentManager(), "Generando etiqueta para: " + elemento.getDescripcionElemento());
+
+        try {
+            Bitmap etiquetaBitmap = EtiquetaUtils.crearBitmapDeEtiqueta(requireContext(), elemento);
+
+            if (etiquetaBitmap != null) {
+                String fileName = "etiqueta_" + elemento.getUniCodeElemento();
+                FileShareUtils.shareImage(requireContext(), etiquetaBitmap, fileName);
+            } else {
+                ToastUtils.showErrorToast(getParentFragmentManager(), "No se pudo generar la etiqueta.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastUtils.showErrorToast(getParentFragmentManager(), "Error al crear la etiqueta: " + e.getMessage());
+        }
     }
 
     @Override
