@@ -2,24 +2,19 @@ package com.example.inventario2025.ui.login;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.inventario2025.R;
+import com.example.inventario2025.data.local.entities.Usuario;
 import com.example.inventario2025.data.remote.api.ApiClient;
 import com.example.inventario2025.data.remote.api.LoginService;
 import com.example.inventario2025.data.remote.models.LoginRequest;
-import com.example.inventario2025.data.remote.models.Usuario;
-import com.example.inventario2025.ui.MainActivity;
 import com.example.inventario2025.utils.SharedPrefManager;
+import com.example.inventario2025.ui.MainActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,26 +24,19 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etUsername, etPassword;
     private Button btnLogin;
+    private SharedPrefManager sharedPrefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
-        SharedPrefManager prefManager = new SharedPrefManager(this);
-        if (prefManager.estaLogueado()) {
+        sharedPrefManager = new SharedPrefManager(this);
+        if (sharedPrefManager.estaLogueado()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
             return;
         }
-
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
@@ -67,49 +55,51 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         LoginService service = ApiClient.getLoginService();
-        LoginRequest request = new LoginRequest(user, pass);  // ✅ Usamos JSON como cuerpo
+        LoginRequest request = new LoginRequest(user, pass);
 
-        Call<Usuario> call = service.login(request);
+        Call<com.example.inventario2025.data.remote.models.Usuario> call = service.login(request);
 
-        call.enqueue(new Callback<Usuario>() {
+        call.enqueue(new Callback<com.example.inventario2025.data.remote.models.Usuario>() {
             @Override
             public void onResponse(Call<com.example.inventario2025.data.remote.models.Usuario> call, Response<com.example.inventario2025.data.remote.models.Usuario> response) {
+
                 if (response.isSuccessful() && response.body() != null) {
-                    // Recibimos el usuario de la API (tipo remote.models.Usuario)
                     com.example.inventario2025.data.remote.models.Usuario usuarioRemoto = response.body();
 
-                    Log.d("LOGIN_DEBUG", "ID: " + usuarioRemoto.getIdUsuario());
-                    Log.d("LOGIN_DEBUG", "Username: " + usuarioRemoto.getUsername());
-                    Log.d("LOGIN_DEBUG", "TipoUsuario: " + usuarioRemoto.getTipoUsuario());
+                    // Validar estado del usuario
+                    if (usuarioRemoto.getEstado() == 0) {
+                        Toast.makeText(LoginActivity.this, "Usuario desactivado temporalmente", Toast.LENGTH_LONG).show();
+                        return;
+                    }
 
-                    // Creamos un objeto del tipo que espera SharedPrefManager (local.entities.Usuario)
-                    com.example.inventario2025.data.local.entities.Usuario usuarioLocal = new com.example.inventario2025.data.local.entities.Usuario();
-
-                    // Copiamos los datos del objeto remoto al objeto local
+                    Usuario usuarioLocal = new Usuario();
                     usuarioLocal.setIdUsuario(usuarioRemoto.getIdUsuario());
                     usuarioLocal.setUsername(usuarioRemoto.getUsername());
+                    usuarioLocal.setPassword(usuarioRemoto.getPassword());
                     usuarioLocal.setTipoUsuario(usuarioRemoto.getTipoUsuario());
                     usuarioLocal.setIdPersona(usuarioRemoto.getIdPersona());
                     usuarioLocal.setEstado(usuarioRemoto.getEstado());
 
-                    // Guardamos el objeto local, que es el tipo correcto
-                    SharedPrefManager prefManager = new SharedPrefManager(LoginActivity.this);
-                    prefManager.guardarUsuario(usuarioLocal);
+                    sharedPrefManager.guardarUsuario(usuarioLocal);
 
-                    Toast.makeText(LoginActivity.this, "Bienvenido " + usuarioRemoto.getUsername(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Bienvenido " + usuarioLocal.getUsername(), Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
-
                 } else {
-                    Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
-                    Log.d("LOGIN_DEBUG", "Código de error: " + response.code());
+                    // ✅ Detectar errores específicos
+                    if (response.code() == 403) {
+                        Toast.makeText(LoginActivity.this, "Usuario desactivado temporalmente", Toast.LENGTH_LONG).show();
+                    } else if (response.code() == 401) {
+                        Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Error inesperado: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<Usuario> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Error de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("LOGIN_DEBUG", "Error en red o servidor", t);
+            public void onFailure(Call<com.example.inventario2025.data.remote.models.Usuario> call, Throwable t) {
+                Toast.makeText(LoginActivity.this, "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
