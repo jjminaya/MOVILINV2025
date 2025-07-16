@@ -53,6 +53,7 @@ public class ElementosListFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             currentInventario = (Inventario) getArguments().getSerializable("inventario");
+
         }
     }
 
@@ -198,11 +199,8 @@ public class ElementosListFragment extends Fragment implements
 
     @Override
     public void onItemClick(Elemento elemento) {
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("elemento", elemento);
-
-        NavController navController = Navigation.findNavController(requireView());
-        navController.navigate(R.id.detalleElementoFragment, bundle);
+        DetalleElementoDialogFragment dialogFragment = DetalleElementoDialogFragment.newInstance(elemento);
+        dialogFragment.show(getParentFragmentManager(), "DetalleElementoDialogFragment");
     }
 
 
