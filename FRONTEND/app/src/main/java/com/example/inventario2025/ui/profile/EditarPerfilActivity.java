@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.inventario2025.R;
 import com.example.inventario2025.data.remote.api.ApiClient;
 import com.example.inventario2025.data.remote.api.UsuarioService;
-import com.example.inventario2025.data.remote.models.Usuario;
+import com.example.inventario2025.data.local.entities.Usuario;
 import com.example.inventario2025.utils.SharedPrefManager;
 
 import retrofit2.Call;
@@ -24,7 +24,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
     private Button btnGuardar;
 
     private SharedPrefManager sharedPrefManager;
-    private Usuario usuarioActual;
+    private Usuario usuarioActualLocal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +36,15 @@ public class EditarPerfilActivity extends AppCompatActivity {
         btnGuardar = findViewById(R.id.btnGuardarPerfil);
 
         sharedPrefManager = new SharedPrefManager(this);
-        usuarioActual = sharedPrefManager.obtenerUsuario();
+        usuarioActualLocal = sharedPrefManager.obtenerUsuario();
 
-        if (usuarioActual == null || usuarioActual.getIdUsuario() == 0) {
+        if (usuarioActualLocal == null || usuarioActualLocal.getIdUsuario() == -1) { // Comprobar con -1
             Toast.makeText(this, "Error: Usuario no válido", Toast.LENGTH_LONG).show();
-            finish(); // Cierra la actividad
+            finish();
             return;
         }
 
-        etUsername.setText(usuarioActual.getUsername());
+        etUsername.setText(usuarioActualLocal.getUsername());
 
         btnGuardar.setOnClickListener(v -> {
             String nuevoUsername = etUsername.getText().toString().trim();
@@ -60,21 +60,39 @@ public class EditarPerfilActivity extends AppCompatActivity {
                 return;
             }
 
-            usuarioActual.setUsername(nuevoUsername);
-            usuarioActual.setPassword(nuevaPassword);
+            // Convertimos el objeto local a un objeto remoto para enviarlo a la API
+            com.example.inventario2025.data.remote.models.Usuario usuarioParaEnviar = new com.example.inventario2025.data.remote.models.Usuario();
+            usuarioParaEnviar.setIdUsuario(usuarioActualLocal.getIdUsuario());
+            usuarioParaEnviar.setUsername(nuevoUsername);
+            usuarioParaEnviar.setPassword(nuevaPassword);
+            // Copia otros campos si la API los necesita para actualizar
+            usuarioParaEnviar.setTipoUsuario(usuarioActualLocal.getTipoUsuario());
+            usuarioParaEnviar.setIdPersona(usuarioActualLocal.getIdPersona());
+            usuarioParaEnviar.setEstado(usuarioActualLocal.getEstado());
 
             UsuarioService service = ApiClient.getUsuarioService();
-            Call<Usuario> call = service.actualizarUsuario(usuarioActual.getIdUsuario(), usuarioActual);
+            Call<com.example.inventario2025.data.remote.models.Usuario> call = service.actualizarUsuario(usuarioActualLocal.getIdUsuario(), usuarioParaEnviar);
 
-            call.enqueue(new Callback<Usuario>() {
+            call.enqueue(new Callback<com.example.inventario2025.data.remote.models.Usuario>() {
                 @Override
-                public void onResponse(Call<Usuario> call, Response<Usuario> response) {
-                    if (response.isSuccessful()) {
-                        sharedPrefManager.guardarUsuario(response.body());
+                public void onResponse(Call<com.example.inventario2025.data.remote.models.Usuario> call, Response<com.example.inventario2025.data.remote.models.Usuario> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        com.example.inventario2025.data.remote.models.Usuario usuarioRemotoActualizado = response.body();
+
+                        // Convertimos la respuesta remota a un objeto local antes de guardar
+                        Usuario usuarioLocalParaGuardar = new Usuario();
+                        usuarioLocalParaGuardar.setIdUsuario(usuarioRemotoActualizado.getIdUsuario());
+                        usuarioLocalParaGuardar.setUsername(usuarioRemotoActualizado.getUsername());
+                        usuarioLocalParaGuardar.setPassword(usuarioRemotoActualizado.getPassword());
+                        usuarioLocalParaGuardar.setTipoUsuario(usuarioRemotoActualizado.getTipoUsuario());
+                        usuarioLocalParaGuardar.setIdPersona(usuarioRemotoActualizado.getIdPersona());
+                        usuarioLocalParaGuardar.setEstado(usuarioRemotoActualizado.getEstado());
+
+                        // Guardamos el objeto del tipo correcto (local)
+                        sharedPrefManager.guardarUsuario(usuarioLocalParaGuardar);
 
                         Toast.makeText(EditarPerfilActivity.this, "Perfil actualizado correctamente", Toast.LENGTH_SHORT).show();
 
-                        // Devuelve resultado al fragmento anterior
                         setResult(RESULT_OK, new Intent());
                         finish();
                     } else if (response.code() == 409) {
@@ -85,7 +103,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<Usuario> call, Throwable t) {
+                public void onFailure(Call<com.example.inventario2025.data.remote.models.Usuario> call, Throwable t) {
                     Toast.makeText(EditarPerfilActivity.this, "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });

@@ -39,14 +39,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Ingrese username del colaborador"
+            android:hint="Buscar username"
             app:endIconMode="clear_text">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editTextUsername"
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteTextViewUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:completionThreshold="1" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

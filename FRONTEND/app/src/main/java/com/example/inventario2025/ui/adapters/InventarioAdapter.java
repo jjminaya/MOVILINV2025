@@ -52,6 +52,16 @@ public class InventarioAdapter extends RecyclerView.Adapter<InventarioAdapter.In
         Inventario currentInventario = inventarioList.get(position);
         holder.bind(currentInventario);
 
+        if ("OWNR".equalsIgnoreCase(currentInventario.getRangoColaborador())) {
+            holder.deleteButton.setVisibility(View.VISIBLE);
+            holder.addCollaboratorButton.setVisibility(View.VISIBLE);
+            holder.editButton.setVisibility(View.VISIBLE);
+        } else {
+            holder.deleteButton.setVisibility(View.GONE);
+            holder.addCollaboratorButton.setVisibility(View.VISIBLE);
+            holder.editButton.setVisibility(View.VISIBLE);
+        }
+
         holder.editButton.setOnClickListener(v -> {
             if (onItemActionListener != null) {
                 onItemActionListener.onEditClick(currentInventario);

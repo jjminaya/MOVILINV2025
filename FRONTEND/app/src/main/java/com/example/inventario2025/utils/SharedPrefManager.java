@@ -3,7 +3,9 @@ package com.example.inventario2025.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.inventario2025.data.remote.models.Usuario;
+// CAMBIOS AQUI: Se importa el modelo de datos correcto
+import com.example.inventario2025.data.local.entities.Usuario;
+
 
 public class SharedPrefManager {
     private static final String SHARED_PREF_NAME = "user_session";
@@ -22,7 +24,6 @@ public class SharedPrefManager {
         editor = sharedPreferences.edit();
     }
 
-    // ✅ Guarda todos los datos del usuario
     public void guardarUsuario(Usuario usuario) {
         editor.putInt(KEY_ID, usuario.getIdUsuario());
         editor.putString(KEY_USERNAME, usuario.getUsername());
@@ -33,7 +34,6 @@ public class SharedPrefManager {
         editor.apply();
     }
 
-    // ✅ Devuelve el usuario completo almacenado
     public Usuario obtenerUsuario() {
         Usuario usuario = new Usuario();
         usuario.setIdUsuario(sharedPreferences.getInt(KEY_ID, -1));
@@ -45,13 +45,15 @@ public class SharedPrefManager {
         return usuario;
     }
 
-    // ✅ Limpia todos los datos (cerrar sesión)
+    public int obtenerIdUsuario() {
+        return sharedPreferences.getInt(KEY_ID, -1); // Devuelve -1 si no se encuentra
+    }
+
     public void cerrarSesion() {
         editor.clear();
         editor.apply();
     }
 
-    // ✅ Verifica si hay un usuario guardado
     public boolean estaLogueado() {
         return sharedPreferences.contains(KEY_ID)
                 && sharedPreferences.getInt(KEY_ID, -1) != -1

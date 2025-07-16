@@ -73,20 +73,33 @@ public class LoginActivity extends AppCompatActivity {
 
         call.enqueue(new Callback<Usuario>() {
             @Override
-            public void onResponse(Call<Usuario> call, Response<Usuario> response) {
+            public void onResponse(Call<com.example.inventario2025.data.remote.models.Usuario> call, Response<com.example.inventario2025.data.remote.models.Usuario> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Usuario usuario = response.body();
+                    // Recibimos el usuario de la API (tipo remote.models.Usuario)
+                    com.example.inventario2025.data.remote.models.Usuario usuarioRemoto = response.body();
 
-                    Log.d("LOGIN_DEBUG", "ID: " + usuario.getIdUsuario());
-                    Log.d("LOGIN_DEBUG", "Username: " + usuario.getUsername());
-                    Log.d("LOGIN_DEBUG", "TipoUsuario: " + usuario.getTipoUsuario());
+                    Log.d("LOGIN_DEBUG", "ID: " + usuarioRemoto.getIdUsuario());
+                    Log.d("LOGIN_DEBUG", "Username: " + usuarioRemoto.getUsername());
+                    Log.d("LOGIN_DEBUG", "TipoUsuario: " + usuarioRemoto.getTipoUsuario());
 
+                    // Creamos un objeto del tipo que espera SharedPrefManager (local.entities.Usuario)
+                    com.example.inventario2025.data.local.entities.Usuario usuarioLocal = new com.example.inventario2025.data.local.entities.Usuario();
+
+                    // Copiamos los datos del objeto remoto al objeto local
+                    usuarioLocal.setIdUsuario(usuarioRemoto.getIdUsuario());
+                    usuarioLocal.setUsername(usuarioRemoto.getUsername());
+                    usuarioLocal.setTipoUsuario(usuarioRemoto.getTipoUsuario());
+                    usuarioLocal.setIdPersona(usuarioRemoto.getIdPersona());
+                    usuarioLocal.setEstado(usuarioRemoto.getEstado());
+
+                    // Guardamos el objeto local, que es el tipo correcto
                     SharedPrefManager prefManager = new SharedPrefManager(LoginActivity.this);
-                    prefManager.guardarUsuario(usuario);
+                    prefManager.guardarUsuario(usuarioLocal);
 
-                    Toast.makeText(LoginActivity.this, "Bienvenido " + usuario.getUsername(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Bienvenido " + usuarioRemoto.getUsername(), Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
+
                 } else {
                     Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
                     Log.d("LOGIN_DEBUG", "Código de error: " + response.code());

@@ -26,5 +26,14 @@ class colaboradorRepository extends CrudRepository{
             };
         }
     }
+
+    async getAllActiveUsers() {
+    const query = `
+        SELECT idUsuario, username FROM usuario
+        WHERE estado = 1
+    `;
+    const [result] = await this.pool.query(query);
+    return result;
+    }
 }
 module.exports = new colaboradorRepository();

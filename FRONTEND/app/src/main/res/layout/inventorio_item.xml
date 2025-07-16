@@ -7,20 +7,19 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp" >
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/inventory_id_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:contentDescription="Identificador de inventario"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
@@ -30,31 +29,28 @@
 
         <TextView
             android:id="@+id/inventory_description_text_view"
-            android:layout_width="252dp"
-            android:layout_height="47dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:textColor="?attr/colorOnSurface"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/inventory_elements_text_view"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintEnd_toStartOf="@+id/button_toggle_actions"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/inventory_id_text_view"
-            tools:text="Inventario de Suministros de Oficina" />
+            tools:text="Inventario de Suministros de Oficina con un nombre muy largo para probar el ajuste de texto" />
 
         <TextView
             android:id="@+id/inventory_elements_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
             android:contentDescription="Número de elementos en el inventario"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@id/inventory_description_text_view"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/inventory_description_text_view"
-            app:layout_constraintVertical_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inventory_description_text_view"
             tools:text="Elementos: 50" />
 
         <ImageButton
@@ -95,12 +91,9 @@
             android:padding="8dp"
             app:tint="@color/dark_gray"
             tools:ignore="ImageContrastCheck" />
-
-        <!-- Margen entre botones -->
         <View
             android:layout_width="8dp"
             android:layout_height="match_parent" />
-
         <ImageButton
             android:id="@+id/button_add_collaborator"
             android:layout_width="48dp"
@@ -112,11 +105,9 @@
             android:padding="8dp"
             app:tint="@color/purple_500"
             tools:ignore="ImageContrastCheck" />
-
         <View
             android:layout_width="8dp"
             android:layout_height="match_parent" />
-
         <ImageButton
             android:id="@+id/button_delete_inventory"
             android:layout_width="48dp"
