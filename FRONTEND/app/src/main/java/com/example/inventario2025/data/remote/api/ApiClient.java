@@ -8,7 +8,7 @@ public class ApiClient {
     // ✅ Producción (servidor web)
     private static final String BASE_URL = "http://200.234.238.128/api/";
     // Local solo si pruebas localmente
-    // private static final String BASE_URL = "http://192.168.1.101:3000/";
+
 
     private static Retrofit retrofit;
 

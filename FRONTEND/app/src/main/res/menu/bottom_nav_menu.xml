@@ -6,6 +6,9 @@
         android:icon="@drawable/baseline_folder_24" android:title="Inventarios" />
 
     <item
+        android:id="@+id/navigation_reportes"
+        android:icon="@drawable/outline_assignment_24" android:title="Reportes" />
+    <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/baseline_account_box_24" android:title="Perfil" />
 </menu>

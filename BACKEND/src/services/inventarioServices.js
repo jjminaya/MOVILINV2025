@@ -21,12 +21,40 @@ class InventarioService{
         return inventarioRepository.create(data);
     }
 
-    crearInventarioOWNR(data){
-        return inventarioRepository.crearInventarioOWNR(data);
+    async crearInventarioOWNR(data){
+        const inventario = await inventarioRepository.crearInventarioOWNR(data);
+
+    await movimientoService.create({
+        idUsuario: data.userID,
+        nombreUsuario: data.nombreUsuario,
+        idInventario: inventario.idInventario,
+        descripcionInventario: inventario.descripcionInventario || data.descripcion,
+        idElemento: null,
+        descripcionElemento: null,
+        tipoObjeto: 'Inventario',
+        accion: 'CREÓ',
+        descripcion: `Inventario creado: ${data.descripcion}`
+    });
+
+    return inventario;
     }
 
-    updateInventario(id, data){
-        return inventarioRepository.update(id, data);
+    async updateInventario(id, data){
+        const updated = await inventarioRepository.update(id, data);
+
+    await movimientoService.create({
+        idUsuario: data.userID,
+        nombreUsuario: data.nombreUsuario,
+        idInventario: id,
+        descripcionInventario: data.descripcionInventario,
+        idElemento: null,
+        descripcionElemento: null,
+        tipoObjeto: 'Inventario',
+        accion: 'EDITÓ',
+        descripcion: `Inventario actualizado: ${data.descripcionInventario}`
+    });
+
+    return updated;
     }
 
     deleteInventario(id){

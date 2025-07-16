@@ -8,6 +8,7 @@ const elementoController = require('./controllers/elementoController');
 const inventarioController = require('./controllers/inventarioController');
 const colaboradorController = require('./controllers/colaboradorController');
 const usuarioController = require('./controllers/usuarioController'); // 👈 controlador directo
+const movimientoController = require('./controllers/movimientoController');
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.post('/api/usuarios/login', usuarioController.login);
 app.use('/api/elementos', elementoController);
 app.use('/api/inventarios', inventarioController);
 app.use('/api/colaboradores', colaboradorController);
-
+app.use('/api/movimientos', movimientoController);
 // 🟢 Servidor accesible desde otras máquinas/redes
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; // Necesario para exponer en red local o IP pública
