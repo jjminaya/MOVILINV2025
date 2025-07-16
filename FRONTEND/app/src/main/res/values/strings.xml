@@ -1,5 +1,20 @@
 <resources>
     <string name="app_name">inventario2025</string>
+    <string name="editar_perfil">Editar Perfil</string>
+    <string name="nombre_de_usuario">Nombre de usuario</string>
+    <string name="ej_jhonatan">Ej. jhonatan</string>
+    <string name="nueva_contrase_a">Nueva contraseña</string>
+    <string name="nueva_contrasenia">Nueva contrasenia</string>
+    <string name="tipo_de_usuario">Tipo de usuario</string>
+    <string name="estado">Estado</string>
+    <string name="activo">Activo</string>
+    <string name="inactivo">Inactivo</string>
+    <string name="guardar_cambios">Guardar cambios</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="inicia_sesi_n">Inicia sesión</string>
+    <string name="usuario">Usuario</string>
+    <string name="contrase__a">Contraseña</string>
+    <string name="ingresar">Ingresar</string>
 
     <string-array name="tipos_usuario">
         <item>ADMIN</item>

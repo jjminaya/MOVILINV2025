@@ -1,15 +1,40 @@
 package com.example.inventario2025.ui.listaElementos;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import android.content.Context;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
+import android.os.Environment;
+
+import androidx.core.content.FileProvider;
+
+import com.example.inventario2025.utils.EtiquetaUtils;
+import com.example.inventario2025.utils.FileShareUtils;
+import com.example.inventario2025.utils.PdfUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -53,6 +78,7 @@ public class ElementosListFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             currentInventario = (Inventario) getArguments().getSerializable("inventario");
+
         }
     }
 
@@ -62,6 +88,7 @@ public class ElementosListFragment extends Fragment implements
         binding = FragmentElementosListBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -194,15 +221,77 @@ public class ElementosListFragment extends Fragment implements
         });
     }
 
+    private void generarYCompartirPDF(Context context, Elemento elemento) {
+        // 1. Crear PDF
+        PdfDocument document = new PdfDocument();
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create(); // A4
+        PdfDocument.Page page = document.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
 
+        Paint paint = new Paint();
+        paint.setTextSize(14);
+        paint.setAntiAlias(true);
+
+        int y = 50;
+
+        canvas.drawText("Detalle del Elemento", 220, y, paint);
+        y += 30;
+
+        canvas.drawText("Código único: " + elemento.getUniCodeElemento(), 40, y, paint);
+        y += 25;
+        canvas.drawText("Descripción: " + elemento.getDescripcionElemento(), 40, y, paint);
+        y += 25;
+        canvas.drawText("Marca: " + elemento.getMarcaElemento(), 40, y, paint);
+        y += 25;
+        canvas.drawText("Modelo: " + elemento.getModeloElemento(), 40, y, paint);
+        y += 25;
+        canvas.drawText("Color: " + elemento.getColorElemento(), 40, y, paint);
+        y += 25;
+        canvas.drawText("Estado físico: " + elemento.getEstadoElemento(), 40, y, paint);
+        y += 25;
+        canvas.drawText("Estado en sistema: " + (elemento.getEstado() == 1 ? "Activo" : "Inactivo"), 40, y, paint);
+        y += 50;
+
+        // 2. Agregar código de barras
+        Bitmap barcode = PdfUtils.generarCodigoBarras(elemento.getUniCodeElemento());
+        if (barcode != null) {
+            canvas.drawBitmap(barcode, 100, y, paint);
+            y += barcode.getHeight() + 30;
+        }
+
+        document.finishPage(page);
+
+        // 3. Guardar el archivo
+        File pdfFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
+                "elemento_" + elemento.getUniCodeElemento() + ".pdf");
+
+        try {
+            FileOutputStream fos = new FileOutputStream(pdfFile);
+            document.writeTo(fos);
+            document.close();
+            fos.close();
+
+            // 4. Compartir el PDF
+            Uri uri = FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".provider", pdfFile);
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("application/pdf");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(Intent.createChooser(intent, "Compartir PDF"));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     public void onItemClick(Elemento elemento) {
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("elemento", elemento);
-
-        NavController navController = Navigation.findNavController(requireView());
-        navController.navigate(R.id.detalleElementoFragment, bundle);
+        DetalleElementoDialogFragment dialogFragment = DetalleElementoDialogFragment.newInstance(elemento);
+        dialogFragment.show(getParentFragmentManager(), "DetalleElementoDialogFragment");
     }
 
 
@@ -222,8 +311,21 @@ public class ElementosListFragment extends Fragment implements
 
     @Override
     public void onPrintCodeClick(Elemento elemento) {
-        // AQUI ENTRA JESUS
-        ToastUtils.showInfoToast(getParentFragmentManager(), "Abriendo vista de impresion: " + elemento.getDescripcionElemento());
+        ToastUtils.showInfoToast(getParentFragmentManager(), "Generando etiqueta para: " + elemento.getDescripcionElemento());
+
+        try {
+            Bitmap etiquetaBitmap = EtiquetaUtils.crearBitmapDeEtiqueta(requireContext(), elemento);
+
+            if (etiquetaBitmap != null) {
+                String fileName = "etiqueta_" + elemento.getUniCodeElemento();
+                FileShareUtils.shareImage(requireContext(), etiquetaBitmap, fileName);
+            } else {
+                ToastUtils.showErrorToast(getParentFragmentManager(), "No se pudo generar la etiqueta.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastUtils.showErrorToast(getParentFragmentManager(), "Error al crear la etiqueta: " + e.getMessage());
+        }
     }
 
     @Override

@@ -37,7 +37,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
         checkActivo = findViewById(R.id.checkActivo);
         checkInactivo = findViewById(R.id.checkInactivo);
         btnGuardar = findViewById(R.id.btnGuardarPerfil);
-        btnCancelar = findViewById(R.id.btnCancelar); // ⬅️ Asegúrate que esté este
+        btnCancelar = findViewById(R.id.btnCancelar);
 
         sharedPrefManager = new SharedPrefManager(this);
         usuarioActual = sharedPrefManager.obtenerUsuario();
@@ -97,7 +97,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
             return;
         }
 
-        // Si no se cambia la contraseña, se conserva la actual
+
         String passwordFinal = nuevaPassword.isEmpty() ? usuarioActual.getPassword() : nuevaPassword;
 
         usuarioActual.setUsername(nuevoUsername);

@@ -52,10 +52,4 @@
         android:name="com.example.inventario2025.ui.profile.ProfileFragment"
         android:label="Perfil"
         tools:layout="@layout/fragment_profile" />
-
-    <fragment
-        android:id="@+id/navigation_reportes"
-        android:name="com.example.inventario2025.ui.reporte.ReporteFragment"
-        android:label="Reportes"
-        tools:layout="@layout/fragment_reporte" />
 </navigation>

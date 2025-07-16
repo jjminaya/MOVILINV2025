@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 } else {
-                    // ✅ Detectar errores específicos
+
                     if (response.code() == 403) {
                         Toast.makeText(LoginActivity.this, "Usuario desactivado temporalmente", Toast.LENGTH_LONG).show();
                     } else if (response.code() == 401) {
