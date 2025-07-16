@@ -33,7 +33,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Editar Perfil"
+                    android:text="@string/editar_perfil"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="#333333"
@@ -44,7 +44,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nombre de usuario"
+                    android:text="@string/nombre_de_usuario"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
 
@@ -52,7 +52,7 @@
                     android:id="@+id/etUsernameEditar"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:hint="Ej. jhonatan"
+                    android:hint="@string/ej_jhonatan"
                     android:background="@drawable/edittext_background"
                     android:inputType="text"
                     android:paddingHorizontal="12dp"
@@ -62,7 +62,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nueva contraseña"
+                    android:text="@string/nueva_contrase_a"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
 
@@ -78,7 +78,7 @@
                         android:id="@+id/etPasswordEditar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Nueva contraseña"
+                        android:hint="@string/nueva_contrasenia"
                         android:inputType="textPassword"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -86,7 +86,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Tipo de usuario"
+                    android:text="@string/tipo_de_usuario"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
 
@@ -100,7 +100,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Estado"
+                    android:text="@string/estado"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
 
@@ -114,13 +114,13 @@
                         android:id="@+id/checkActivo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Activo"/>
+                        android:text="@string/activo"/>
 
                     <CheckBox
                         android:id="@+id/checkInactivo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Inactivo"
+                        android:text="@string/inactivo"
                         android:layout_marginStart="24dp"/>
                 </LinearLayout>
 
@@ -129,7 +129,7 @@
                     android:id="@+id/btnGuardarPerfil"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Guardar cambios"
+                    android:text="@string/guardar_cambios"
                     android:backgroundTint="@color/purple_500"
                     android:textColor="@android:color/white"
                     android:textAllCaps="false"/>
@@ -137,7 +137,7 @@
                     android:id="@+id/btnCancelar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Cancelar"
+                    android:text="@string/cancelar"
                     android:backgroundTint="@android:color/holo_red_light"
                     android:textColor="@android:color/white"
                     android:textAllCaps="false"
