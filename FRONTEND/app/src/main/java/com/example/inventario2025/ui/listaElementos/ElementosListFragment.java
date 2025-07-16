@@ -74,7 +74,7 @@ public class ElementosListFragment extends Fragment implements
 
         if (currentInventario != null) {
             binding.inventoryTitleElements.setText("Elementos de: " + currentInventario.getDescripcionInventario());
-            elementosListViewModel.setCurrentInventarioId(currentInventario.getIdInventario());
+            elementosListViewModel.setCurrentInventario(currentInventario);
         } else {
             binding.inventoryTitleElements.setText("Error: Inventario no encontrado.");
             binding.elementsNoDataCard.setVisibility(View.VISIBLE);

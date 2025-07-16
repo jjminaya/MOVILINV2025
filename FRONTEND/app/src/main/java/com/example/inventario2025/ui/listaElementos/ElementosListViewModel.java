@@ -10,10 +10,13 @@ import android.util.Log;
 
 import com.example.inventario2025.data.local.InventarioBaseDatos;
 import com.example.inventario2025.data.local.dao.ElementoDao;
+import com.example.inventario2025.data.local.dao.InventarioDao;
 import com.example.inventario2025.data.local.entities.Elemento;
+import com.example.inventario2025.data.local.entities.Inventario;
 import com.example.inventario2025.data.repository.ElementoRepository;
 import com.example.inventario2025.data.remote.RetrofitClient;
 import com.example.inventario2025.data.remote.api.InventorioApiService;
+import com.example.inventario2025.data.repository.InventarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,8 @@ public class ElementosListViewModel extends AndroidViewModel {
 
     private static final String TAG = "ElementosListViewModel";
     private final ElementoRepository elementoRepository;
+    private final InventarioRepository inventarioRepository;
+    private Inventario currentInventario;
 
     private final MutableLiveData<List<Elemento>> _elementos = new MutableLiveData<>();
     public LiveData<List<Elemento>> elementos = _elementos;
@@ -60,8 +65,11 @@ public class ElementosListViewModel extends AndroidViewModel {
         super(application);
         InventarioBaseDatos database = InventarioBaseDatos.getDatabase(application);
         ElementoDao elementoDao = database.elementoDao();
+        InventarioDao inventarioDao = database.inventoryDao();
         InventorioApiService inventorioApiService = RetrofitClient.getInventoryApiService();
+
         elementoRepository = new ElementoRepository(elementoDao, inventorioApiService);
+        inventarioRepository = new InventarioRepository(inventarioDao, inventorioApiService);
 
         _filteredElements.addSource(_elementos, elements ->
                 applyFilter(_elementos.getValue(), _searchTerm.getValue()));
@@ -69,9 +77,11 @@ public class ElementosListViewModel extends AndroidViewModel {
                 applyFilter(_elementos.getValue(), _searchTerm.getValue()));
     }
 
-    public void setCurrentInventarioId(int inventarioId) {
-        this.currentInventarioId = inventarioId;
-        loadElementsForInventario(inventarioId);
+    public void setCurrentInventario(Inventario inventario) {
+        this.currentInventario = inventario;
+        if (inventario != null) {
+            loadElementsForInventario(inventario.getIdInventario());
+        }
     }
 
     public void loadElementsForInventario(int inventarioId) {
@@ -109,10 +119,10 @@ public class ElementosListViewModel extends AndroidViewModel {
             public void onSuccess() {
                 _isLoading.postValue(false);
                 _createElementoSuccess.postValue(true);
-                loadElementsForInventario(currentInventarioId);
+                updateInventarioCount(1);
+                loadElementsForInventario(currentInventario.getIdInventario());
                 _infoMessage.postValue(null);
                 _successMessage.postValue("Elemento agregado correctamente.");
-                Log.d(TAG, "Elemento agregado exitosamente.");
             }
 
             @Override
@@ -165,10 +175,10 @@ public class ElementosListViewModel extends AndroidViewModel {
             public void onSuccess() {
                 _isLoading.postValue(false);
                 _deleteElementoSuccess.postValue(true);
-                loadElementsForInventario(currentInventarioId);
+                updateInventarioCount(-1);
+                loadElementsForInventario(currentInventario.getIdInventario());
                 _infoMessage.postValue(null);
                 _successMessage.postValue("Elemento eliminado correctamente.");
-                Log.d(TAG, "Elemento eliminado exitosamente.");
             }
 
             @Override
@@ -178,6 +188,25 @@ public class ElementosListViewModel extends AndroidViewModel {
                 _deleteElementoSuccess.postValue(false);
                 _infoMessage.postValue(null);
                 Log.e(TAG, "Fallo al eliminar elemento: " + message);
+            }
+        });
+    }
+
+    private void updateInventarioCount(int change) {
+        if (currentInventario == null) return;
+
+        int nuevoConteo = currentInventario.getElementosInventario() + change;
+        currentInventario.setElementosInventario(nuevoConteo); // Actualizamos el objeto localmente
+
+        inventarioRepository.updateInventarioElementoCount(currentInventario.getIdInventario(), nuevoConteo, new InventarioRepository.OnOperationCompleteListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Conteo de inventario actualizado exitosamente a " + nuevoConteo);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                Log.e(TAG, "Fallo al actualizar conteo de inventario: " + message);
             }
         });
     }
