@@ -6,54 +6,49 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <EditText android:id="@+id/etCodigo"
+    <EditText
+        android:id="@+id/etCodigo"
         android:hint="Código único"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <EditText android:id="@+id/etDescripcion"
+    <EditText
+        android:id="@+id/etDescripcion"
         android:hint="Descripción"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <EditText android:id="@+id/etMarca"
+    <EditText
+        android:id="@+id/etMarca"
         android:hint="Marca"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <EditText android:id="@+id/etModelo"
+    <EditText
+        android:id="@+id/etModelo"
         android:hint="Modelo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <EditText android:id="@+id/etColor"
+    <EditText
+        android:id="@+id/etColor"
         android:hint="Color"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <EditText android:id="@+id/etEstadoFisico"
+    <EditText
+        android:id="@+id/etEstadoFisico"
         android:hint="Estado físico"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- Botones -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:gravity="end"
-        android:orientation="horizontal"
-        android:layout_marginTop="12dp">
+        android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btnCancelar"
-            android:text="Cancelar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/btnGuardarCambios"
-            android:text="Guardar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>

@@ -8,6 +8,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import android.graphics.Bitmap;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -63,11 +68,18 @@ public class DetalleElementoDialogFragment extends DialogFragment {
             setTextForInclude(binding.getRoot(), R.id.atributoEstadoFisico, "Estado físico", valorSeguro(elemento.getEstadoElemento()));
             setTextForInclude(binding.getRoot(), R.id.atributoEstadoSistema, "Estado en sistema", (elemento.getEstado() == 1 ? "Activo" : "Inactivo"));
         }
-
+        if (elemento != null) {
+            String codigo = valorSeguro(elemento.getUniCodeElemento());
+            Bitmap codigoBarrasBitmap = generarCodigoBarras(codigo);
+            if (codigoBarrasBitmap != null) {
+                binding.imgCodigoBarras.setImageBitmap(codigoBarrasBitmap);
+            }
+        }
         binding.btnCerrar.setOnClickListener(v -> dismiss());
 
         return binding.getRoot();
     }
+
 
     private void setTextForInclude(View root, int includeId, String titulo, String valor) {
         View includeView = root.findViewById(includeId);
@@ -81,6 +93,16 @@ public class DetalleElementoDialogFragment extends DialogFragment {
 
     private String valorSeguro(String texto) {
         return texto != null && !texto.trim().isEmpty() ? texto : "(Sin datos)";
+    }
+
+    private Bitmap generarCodigoBarras(String codigo) {
+        try {
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            return barcodeEncoder.encodeBitmap(codigo, BarcodeFormat.CODE_128, 600, 150);
+        } catch (WriterException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
