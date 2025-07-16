@@ -9,7 +9,14 @@ public class ReporteMovimiento {
     private String descripcion;
 
     // Constructor vacío (necesario para Retrofit)
-    public ReporteMovimiento() {}
+    public ReporteMovimiento(int id, String fecha, String usuario, String tipoObjeto, String accion, String descripcion) {
+        this.id = id;
+        this.fecha = fecha;
+        this.usuario = usuario;
+        this.tipoObjeto = tipoObjeto;
+        this.accion = accion;
+        this.descripcion = descripcion;
+    }
 
     // Getters y Setters
     public int getId() { return id; }

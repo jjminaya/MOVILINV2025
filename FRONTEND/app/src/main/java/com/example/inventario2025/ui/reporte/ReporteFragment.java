@@ -14,24 +14,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.inventario2025.R;
-import com.example.inventario2025.data.remote.api.ApiClient;
-import com.example.inventario2025.data.remote.api.MovimientoService;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ReporteFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ReporteAdapter adapter;
     private Button btnSeleccionarFecha;
-    private MovimientoService movimientoService;
 
     public ReporteFragment() {
         // Constructor vacío
@@ -51,7 +45,9 @@ public class ReporteFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         btnSeleccionarFecha = view.findViewById(R.id.btnSeleccionarFecha);
-        movimientoService = ApiClient.getClient().create(MovimientoService.class);
+
+        // Cargar datos de ejemplo al iniciar
+        cargarMovimientosLocales();
 
         btnSeleccionarFecha.setOnClickListener(v -> mostrarSelectorFecha());
     }
@@ -63,7 +59,7 @@ public class ReporteFragment extends Fragment {
                     calendar.set(year, month, dayOfMonth);
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                     String fechaSeleccionada = sdf.format(calendar.getTime());
-                    obtenerMovimientosPorFecha(fechaSeleccionada);
+                    filtrarMovimientosPorFecha(fechaSeleccionada);
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -72,21 +68,31 @@ public class ReporteFragment extends Fragment {
         dialog.show();
     }
 
-    private void obtenerMovimientosPorFecha(String fecha) {
-        movimientoService.getMovimientos().enqueue(new Callback<List<ReporteMovimiento>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<ReporteMovimiento>> call, @NonNull Response<List<ReporteMovimiento>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<ReporteMovimiento> movimientos = response.body();
-                    adapter = new ReporteAdapter(movimientos);
-                    recyclerView.setAdapter(adapter);
-                }
-            }
+    private List<ReporteMovimiento> listaMock;
 
-            @Override
-            public void onFailure(@NonNull Call<List<ReporteMovimiento>> call, @NonNull Throwable t) {
-                t.printStackTrace();
+    private void cargarMovimientosLocales() {
+        listaMock = new ArrayList<>();
+        listaMock.add(new ReporteMovimiento(1, "2025-07-15", "Juan Pérez", "Elemento", "Crear", "Se agregó una Laptop Lenovo al inventario."));
+        listaMock.add(new ReporteMovimiento(2, "2025-07-15", "María López", "Inventario", "Modificar", "Cambio de ubicación de proyector Epson."));
+        listaMock.add(new ReporteMovimiento(3, "2025-07-14", "Carlos Ruiz", "Elemento", "Eliminar", "Se retiró un monitor LG dañado."));
+        listaMock.add(new ReporteMovimiento(4, "2025-07-13", "Lucía Gómez", "Inventario", "Crear", "Nuevo inventario en Oficina Principal."));
+        listaMock.add(new ReporteMovimiento(5, "2025-07-13", "Luis Díaz", "Elemento", "Modificar", "Actualización del router TP-Link."));
+        listaMock.add(new ReporteMovimiento(6, "2025-07-12", "Ana Torres", "Elemento", "Crear", "Ingreso de teclado Logitech."));
+        listaMock.add(new ReporteMovimiento(7, "2025-07-11", "Pedro Mendoza", "Elemento", "Eliminar", "Se eliminó un mouse en mal estado."));
+
+        adapter = new ReporteAdapter(listaMock);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void filtrarMovimientosPorFecha(String fecha) {
+        List<ReporteMovimiento> filtrados = new ArrayList<>();
+        for (ReporteMovimiento m : listaMock) {
+            if (m.getFecha().equals(fecha)) {
+                filtrados.add(m);
             }
-        });
+        }
+
+        adapter = new ReporteAdapter(filtrados);
+        recyclerView.setAdapter(adapter);
     }
 }
