@@ -69,7 +69,7 @@ public class InventorioListViewModel extends AndroidViewModel {
         inventoryRepository = new InventarioRepository(inventoryDao, apiService);
 
         SharedPrefManager prefManager = new SharedPrefManager(application);
-        loggedInUserId = prefManager.obtenerIdUsuario();
+        loggedInUserId = prefManager.obtenerUsuario().getIdUsuario();
 
         if (loggedInUserId != -1) {
             allCachedInventories = inventoryRepository.getInventoriesByUserId(loggedInUserId);
